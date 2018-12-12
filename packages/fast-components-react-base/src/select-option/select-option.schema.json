@@ -1,0 +1,30 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "title": "Select option",
+    "description": "A select option component's schema definition.",
+    "type": "object",
+    "id": "select-option",
+    "properties": {
+        "disabled": {
+            "title": "Disabled",
+            "type": "boolean"
+        },
+        "selected": {
+            "title": "Selected",
+            "type": "boolean"
+        },
+        "value": {
+            "title": "Value",
+            "type": "string"
+        }
+    },
+    "reactProperties": {
+        "children": {
+            "title": "Building blocks",
+            "type": "children",
+            "defaults": [
+                "text"
+            ]
+        }
+    }
+}

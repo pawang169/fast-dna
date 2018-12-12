@@ -1,0 +1,18 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "title": "Select",
+    "description": "A select component's schema definition.",
+    "type": "object",
+    "id": "select",
+    "properties": {
+    },
+    "reactProperties": {
+        "children": {
+            "title": "Building blocks",
+            "type": "children",
+            "ids": [
+                "select-option"
+            ]
+        }
+    }
+}

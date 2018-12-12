@@ -40,6 +40,12 @@ export { ProgressExamples };
 import RadioExamples from "../src/radio/examples.data";
 export { RadioExamples };
 
+import SelectExamples from "../src/select/examples.data";
+export { SelectExamples };
+
+import SelectOptionExamples from "../src/select-option/examples.data";
+export { SelectOptionExamples };
+
 import TabsExamples from "../src/tabs/examples.data";
 export { TabsExamples };
 
