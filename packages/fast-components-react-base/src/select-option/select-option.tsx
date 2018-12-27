@@ -7,7 +7,7 @@ import {
     SelectOptionProps,
     SelectOptionUnhandledProps,
 } from "./select-option.props";
-import { SelectContext, SelectContextType} from "../select/select.context"
+import { SelectContext, SelectContextType } from "../select/select.context";
 
 class SelectOption extends Foundation<
     SelectOptionHandledProps,
@@ -26,64 +26,92 @@ class SelectOption extends Foundation<
         disabled: void 0,
         value: void 0,
         managedClasses: void 0,
+        id: void 0,
     };
+
+    /**
+     * React life cycle function
+     */
+    public componentDidMount(): void {
+        (this.context as SelectContextType).registerOption(
+            this.props.id,
+            this.props.value
+        );
+    }
+
+    /**
+     * React life cycle function
+     */
+    public componentWillUnmount(): void {
+        (this.context as SelectContextType).unregisterOption(this.props.id);
+    }
 
     /**
      * Renders the component
      */
     public render(): React.ReactElement<HTMLDivElement> {
+        const shouldShowChildren: boolean = (this.context as SelectContextType)
+            .isMenuOpen;
+        const shouldShowSelected: boolean =
+            (this.context as SelectContextType).selectedOptionIds.indexOf(
+                this.props.id
+            ) !== -1;
         return (
             <div
                 {...this.unhandledProps()}
                 className={this.generateClassNames()}
-                aria-disabled={this.props.disabled || undefined}
+                role="option"
+                aria-selected={shouldShowSelected}
+                aria-disabled={this.props.disabled}
+                onClick={this.handleClick}
             >
-                {this.renderChildren()}
-                {this.context.selectedValues}
+                {shouldShowChildren ? this.props.children : null}
             </div>
         );
+    }
+
+    /**
+     * Invoke this option
+     */
+    public invokeOption(): void {
+        if (this.props.disabled) {
+            return;
+        }
+        (this.context as SelectContextType).optionInvoked(this.props.id);
     }
 
     /**
      * Create class-names
      */
     protected generateClassNames(): string {
-        let className: string = get(this.props.managedClasses, "selectOption") || "";
+        let classNames: string = get(this.props, "managedClasses.selectOption", "");
         if (this.props.disabled) {
-            className = className.concat(
-                " ",
-                get(this.props.managedClasses, "selectOption__disabled")
-            );
+            classNames = `${classNames} ${get(
+                this.props,
+                "managedClasses.selectOption__disabled",
+                ""
+            )}`;
         }
-        if ((this.context as SelectContextType).selectedValues.indexOf(this.props.value) > -1) {
-            className = className.concat(
-                " ",
-                get(this.props.managedClasses, "selectOption__selected")
-            );
+        if (
+            (this.context as SelectContextType).selectedOptionIds.indexOf(
+                this.props.id
+            ) !== -1
+        ) {
+            classNames = `${classNames} ${get(
+                this.props,
+                "managedClasses.selectOption__selected",
+                ""
+            )}`;
         }
-        return super.generateClassNames(className);
+        return super.generateClassNames(classNames);
     }
 
     /**
-     * Render all child elements
+     * Handle click event
      */
-    protected renderChildren(): React.ReactChild[] {
-        return React.Children.map(this.props.children, this.renderChild);
-    }
-
-    /**
-     * Render a single child
-     */
-    protected renderChild = (child: any, index: number): React.ReactChild => {
-        if (typeof child === "string") {
-            return child;
-        } else {
-            // TODO for scomea: what type check to do here?
-            return React.cloneElement(child, {
-                disabled: this.props.disabled,
-                value: this.props.value,
-            });
-        }
+    private handleClick = (event: React.MouseEvent): void => {
+        event.stopPropagation();
+        this.invokeOption();
     };
 }
 

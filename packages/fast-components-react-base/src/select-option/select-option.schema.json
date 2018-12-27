@@ -9,6 +9,10 @@
             "title": "Disabled",
             "type": "boolean"
         },
+        "fixed": {
+            "title": "Fixed",
+            "type": "boolean"
+        },
         "selected": {
             "title": "Selected",
             "type": "boolean"
@@ -16,6 +20,10 @@
         "value": {
             "title": "Value",
             "type": "string"
+        },
+        "initiallySelected": {
+            "title": "Initially Selected",
+            "type": "boolean"
         }
     },
     "reactProperties": {

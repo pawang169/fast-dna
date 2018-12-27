@@ -3,35 +3,50 @@ import {
     ManagedClasses,
     SelectClassNameContract,
 } from "@microsoft/fast-components-class-name-contracts-base";
+import SelectOption from "../select-option/select-option";
 
 export interface SelectManagedClasses extends ManagedClasses<SelectClassNameContract> {}
 export interface SelectUnhandledProps extends React.HTMLAttributes<HTMLDivElement> {}
+
+export interface OptionData {
+    id: string;
+    value: string;
+}
+
 export interface SelectHandledProps extends SelectManagedClasses {
     /**
-     * The children populate the select menu, any SelectOption components in the 
+     * The children populate the select menu, any SelectOption components in the
      */
     children?: React.ReactNode | React.ReactNode[];
 
     /**
-     * The initially selected value(s), if any
+     * Function which renders the base display of the control
      */
-    initialSelection?: string | string[];
+    contentDisplayRenderFunction?: (
+        selectedOptionIds: string[],
+        selectedOptionData: OptionData[],
+        value: string
+    ) => React.ReactNode;
 
     /**
-     * Value(s) that are initially selected and that cannot be deselected, if any
+     * Function which renders the menu display of the control
      */
-    fixedSelection?: string | string[];
+    menuRenderFunction?: (children: React.ReactNode) => React.ReactNode;
 
     /**
-     * The selected values when fully controlled. Note that setting this value will put the select component into "controlled mode"
-     * and it will be up to the developper to capture user interactions to update this value.
+     * Function which converts and formats the string[] selected values to a the string value to be returned by the control (ie. what gets sent back as a form result)
      */
-    selection?: string | string[];
+    dataValueFormatterFunction?: (selectedValues: string[], selectName: string) => string;
 
     /**
-     * Specifies whether SelectOptions behave as toggles (reselecting a selected value deselects it)
+     * Selected option id's (controlled mode)
      */
-    toggleSelection?: boolean;
+    selectedOptionIds?: string[];
+
+    /**
+     * Id's that are initially selected
+     */
+    defaultSelection?: string[];
 
     /**
      * Specifies that the drop-down list should automatically get focus when the page loads
@@ -39,12 +54,12 @@ export interface SelectHandledProps extends SelectManagedClasses {
     autofocus?: boolean;
 
     /**
-     * Specifies that placeholder string to display when there is no selected value(s)
+     * Specifies that the drop-down list is open
      */
-    noSelectionPlaceholder?: string;
+    isMenuOpen?: boolean;
 
     /**
-     * Specifies that a drop-down list should be disabled
+     * Specifies that the control is disabled
      */
     disabled?: boolean;
 

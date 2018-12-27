@@ -22,12 +22,14 @@ const examples: ComponentFactoryExample<SelectOptionHandledProps> = {
         ...managedClasses,
         children: "test child",
         value: "Test value",
+        id: "TestID",
     },
     data: [
         {
             ...managedClasses,
             children: "test child",
             value: "Test value",
+            id: "TestID",
         },
     ],
 };

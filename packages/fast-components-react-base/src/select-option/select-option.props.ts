@@ -24,6 +24,11 @@ export interface SelectOptionHandledProps extends SelectOptionManagedClasses {
      * the value of the select option (ie. what is sent to the server)
      */
     value: string;
+
+    /**
+     * The unique id for the option
+     */
+    id: string;
 }
 
 export type SelectOptionProps = SelectOptionHandledProps & SelectOptionUnhandledProps;

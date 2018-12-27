@@ -6,13 +6,13 @@ import { SelectOptionProps } from "../select-option";
 import { noop } from "lodash-es";
 import Documentation from "./.tmp/documentation";
 
-function selectOptionPropFactory(): SelectOptionProps {
+function selectOptionPropFactory(exampleValue: string): SelectOptionProps {
     return {
         managedClasses: {
             selectOption: "select-option",
         },
-        value: "test",
-        selected: true,
+        value: exampleValue,
+        id: exampleValue,
     };
 }
 
@@ -33,21 +33,22 @@ const examples: ComponentFactoryExample<SelectProps> = {
             {
                 id: "select-option",
                 props: {
-                    ...selectOptionPropFactory(),
+                    ...selectOptionPropFactory("value 1"),
                     children: "select option 1",
+                    selected: true,
                 },
             },
             {
                 id: "select-option",
                 props: {
-                    ...selectOptionPropFactory(),
+                    ...selectOptionPropFactory("value 2"),
                     children: "select option 2",
                 },
             },
             {
                 id: "select-option",
                 props: {
-                    ...selectOptionPropFactory(),
+                    ...selectOptionPropFactory("value 3"),
                     children: "select option 3",
                 },
             },
@@ -60,21 +61,22 @@ const examples: ComponentFactoryExample<SelectProps> = {
                 {
                     id: "select-option",
                     props: {
-                        ...selectOptionPropFactory(),
+                        ...selectOptionPropFactory("value 1"),
                         children: "select option 1",
+                        selected: true,
                     },
                 },
                 {
                     id: "select-option",
                     props: {
-                        ...selectOptionPropFactory(),
+                        ...selectOptionPropFactory("value 2"),
                         children: "select option 2",
                     },
                 },
                 {
                     id: "select-option",
                     props: {
-                        ...selectOptionPropFactory(),
+                        ...selectOptionPropFactory("value 3"),
                         children: "select option 3",
                     },
                 },

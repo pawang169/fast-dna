@@ -5,6 +5,18 @@
     "type": "object",
     "id": "select",
     "properties": {
+        "disabled": {
+            "title": "Disabled",
+            "type": "boolean"
+        },
+        "isMenuOpen": {
+            "title": "IsMenuOpen",
+            "type": "boolean"
+        },
+        "multiple": {
+            "title": "Multiple",
+            "type": "boolean"
+        }
     },
     "reactProperties": {
         "children": {

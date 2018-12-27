@@ -2,82 +2,100 @@ import * as React from "react";
 import Foundation, { HandledProps } from "@microsoft/fast-components-foundation-react";
 import { get, inRange, invert } from "lodash-es";
 import { SelectClassNameContract } from "@microsoft/fast-components-class-name-contracts-base";
-import { SelectHandledProps, SelectProps, SelectUnhandledProps } from "./select.props";
+import {
+    OptionData,
+    SelectHandledProps,
+    SelectProps,
+    SelectUnhandledProps,
+} from "./select.props";
 import SelectOption, { SelectOptionHandledProps } from "../select-option/select-option";
-import { SelectContext, SelectContextType } from "./select.context"
-import { instanceOf, node } from "prop-types";
-import { type } from "os";
+import { SelectContext, SelectContextType } from "./select.context";
+import { canUseDOM } from "exenv-es6";
+import value from "*.json";
 
 export interface SelectState {
     value: string;
-    selectedOptionValues: string[];
+    selectedOptionIds: string[];
     isMenuOpen: boolean;
+    registeredOptions: OptionData[];
 }
-class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, SelectState> {
 
+class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, SelectState> {
     public static displayName: string = "Select";
 
-    // public static defaultProps: Partial<SelectProps> = {
-    //     size: 5,
-    // };
+    public static defaultProps: Partial<SelectProps> = {
+        multiple: false,
+        disabled: false,
+        selectedOptionIds: [],
+        defaultSelection: [],
+    };
 
     /**
      * Handled props instantiation
      */
     protected handledProps: HandledProps<SelectHandledProps> = {
-        initialSelection: void 0,
-        fixedSelection: void 0,
-        selection: void 0,
+        isMenuOpen: void 0,
         autofocus: void 0,
         disabled: void 0,
         form: void 0,
         multiple: void 0,
         name: void 0,
+        contentDisplayRenderFunction: void 0,
+        menuRenderFunction: void 0,
+        dataValueFormatterFunction: void 0,
         required: void 0,
         managedClasses: void 0,
+        selectedOptionIds: void 0,
+        defaultSelection: void 0,
     };
 
     private rootElement: React.RefObject<HTMLDivElement> = React.createRef<
         HTMLDivElement
     >();
 
+    /**
+     * constructor
+     */
     constructor(props: SelectProps) {
         super(props);
 
         this.state = {
-            selectedOptionValues: [],
+            selectedOptionIds: this.props.defaultSelection,
             value: "",
-            isMenuOpen: false,
+            isMenuOpen: this.getMenuOpenValue(false),
+            registeredOptions: [],
         };
-
-        const nodes: React.ReactNode = this.props.children;
-
-
-        const childArray: React.ReactChild[] = React.Children.toArray(this.props.children);
-
-        const selectOptions: React.ReactChild[] = childArray.filter((child: React.ReactChild) => child !== SelectOption.displayName);
     }
 
     /**
      * Renders the component
      */
     public render(): React.ReactElement<HTMLDivElement> {
+        const invokeFunction: (optionId: string) => void = this.props.multiple
+            ? this.selectMultiModeOptionInvoked
+            : this.selectSingleModeOptionInvoked;
+
         return (
             <div
                 {...this.unhandledProps()}
                 ref={this.rootElement}
-                style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr auto",
-                    gridTemplateRows: "100%",
-                }}
+                aria-disabled={this.props.disabled || undefined}
                 className={this.generateClassNames()}
                 onClick={this.selectClicked}
             >
                 {this.renderContentDisplay()}
-                {this.renderToggle()}
                 {this.renderHiddenSelectElement()}
-                {this.renderMenu()}
+                <SelectContext.Provider
+                    value={{
+                        selectedOptionIds: this.state.selectedOptionIds,
+                        registerOption: this.registerOption,
+                        unregisterOption: this.unregisterOption,
+                        optionInvoked: invokeFunction,
+                        isMenuOpen: this.state.isMenuOpen,
+                    }}
+                >
+                    {this.renderMenu()}
+                </SelectContext.Provider>
             </div>
         );
     }
@@ -86,130 +104,232 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      * Create class names
      */
     protected generateClassNames(): string {
-        return super.generateClassNames(get(this.props.managedClasses, "select"));
+        let className: string = get(this.props.managedClasses, "select") || "";
+
+        if (this.props.disabled) {
+            className = className.concat(
+                " ",
+                get(this.props.managedClasses, "select__disabled")
+            );
+        }
+
+        return super.generateClassNames(className);
     }
 
+    /**
+     * Deternmines which function to use to render content display (ie. the part of the control that shows when the menu isn't open)
+     * and invokes it
+     */
     protected renderContentDisplay(): React.ReactNode {
-        return (
-            <div
-                style={{
-                    gridRowStart: "1",
-                    gridColumnStart: "1",
-                }}
-            >
-                goo
-            </div>
-        );
-    }
-
-    protected renderToggle(): React.ReactNode {
-        return (
-            <div
-                style={{
-                    gridRowStart: "1",
-                    gridColumnStart: "2",
-                }}
-            >
-                *
-            </div>
-        );
-    }
-
-    protected renderMenu(): React.ReactNode {
-        if (this.state.isMenuOpen || this.props.multiple) {
-            return (
-                <SelectContext.Provider value={{
-                    selectedValues:this.state.selectedOptionValues,
-                    fixedValues: Array.isArray(this.props.fixedSelection)
-                        ? this.props.fixedSelection as string[]
-                        : Array.of(this.props.fixedSelection) as string[],
-                }}> 
-                    <div
-                        onClickCapture={this.handleOptionClick}
-                        onKeyDownCapture={this.handleOptionKeyDown}
-                        style={{
-                            width: "100%",
-                            height: "auto",
-                            background: "white",
-                            position: "absolute",
-                        }}
-                    >
-                        {this.props.children}
-                    </div>
-                </SelectContext.Provider>
+        if (this.props.contentDisplayRenderFunction !== undefined) {
+            return this.props.contentDisplayRenderFunction(
+                this.state.selectedOptionIds,
+                this.state.registeredOptions,
+                this.state.value
             );
         } else {
-            return null;
+            return this.defaultDisplayRenderFunction(
+                this.state.selectedOptionIds,
+                this.state.registeredOptions,
+                this.state.value
+            );
         }
     }
 
+    /**
+     * Deternmines which function to use to render the menu and invokes it
+     */
+    protected renderMenu(): React.ReactNode {
+        if (!this.state.isMenuOpen) {
+            return this.hiddenMenuRenderFunction(this.props.children);
+        } else {
+            if (this.props.menuRenderFunction === undefined) {
+                return this.defaultMenuRenderFunction(this.props.children);
+            } else {
+                return this.props.menuRenderFunction(this.props.children);
+            }
+        }
+    }
+
+    /**
+     * Renders a hidden select element which can interact with a
+     * form hosting this component
+     */
     protected renderHiddenSelectElement(): React.ReactNode {
         return (
             <select
                 name={this.props.name}
                 value={this.state.value}
                 style={{
-                    gridRowStart: "1",
-                    gridColumnStart: "2",
                     display: "none",
                 }}
             />
         );
     }
 
+    /**
+     * The default function that renders an unstyled content display
+     */
+    protected defaultDisplayRenderFunction = (
+        selectedOptionIds: string[],
+        registeredOptions: OptionData[],
+        formattedValue: string
+    ): React.ReactNode => {
+        if (formattedValue.length === 0) {
+            return "-----------";
+        } else {
+            return formattedValue;
+        }
+    };
+
+    /**
+     * The default function that renders an unstyled menu
+     */
+    protected defaultMenuRenderFunction = (
+        children: React.ReactNode
+    ): React.ReactNode => {
+        return (
+            <div
+                style={{
+                    width: "100%",
+                    height: "auto",
+                    background: "white",
+                    position: "absolute",
+                }}
+            >
+                {children}
+            </div>
+        );
+    };
+
+    /**
+     * The default function that formats the value string generated based on selection.
+     * This implementation should match the default formatting a base html select control applies.
+     * Developpers can provide different formatters if desired.
+     */
+    protected defaultDataValueFormatter = (
+        selectedValues: string[],
+        selectName: string
+    ): string => {
+        const separator: string = "&";
+        const prefix: string = selectName !== undefined ? selectName + "=" : "";
+        let formattedValue: string = "";
+        selectedValues.forEach((thisValue: string) => {
+            if (formattedValue.length > 0) {
+                formattedValue = formattedValue + separator;
+            }
+            formattedValue = formattedValue + prefix + thisValue;
+        });
+        return formattedValue;
+    };
+
+    /**
+     * Handles clicks on the base display
+     */
     protected selectClicked = (): void => {
-        this.setState({
-            isMenuOpen: true,
-        });
+        if (!this.props.disabled) {
+            this.setState({
+                isMenuOpen: this.getMenuOpenValue(true),
+            });
+        }
     };
 
-    // private initialSelectCallback = (selectedValue: string): void => {
-    //     if (!this.state.selectedOptionValues.indexOf(selectedValue)) {
-    //         const newSelectedOptionValues: string[] = this.state.selectedOptionValues.splice(0,0,selectedValue);
-    //         this.setState({
-    //             isMenuOpen: true,
-    //             selectedOptionValues: newSelectedOptionValues,
-    //         });
-    //     }
-    // }
-
     /**
-     * Handle the keydown event of the item
+     * Function called by child select options to register themselves
      */
+    protected registerOption = (optionId: string, optionValue: string): void => {
+        const optionData: OptionData = {
+            id: optionId,
+            value: optionValue,
+        };
 
-    private handleOptionKeyDown = (e: React.KeyboardEvent<HTMLDivElement>): void => {
-        // if (this.props.disabled) {
-        //     return;
-        // }
-
-        // if (typeof this.props.onInvoke === "function") {
-        //     switch (e.keyCode) {
-        //         case KeyCodes.enter:
-        //         case KeyCodes.space:
-        //             this.props.onInvoke(this.props);
-        //             break;
-        //     }
-        // }
-        this.setState({
-            isMenuOpen: false,
+        this.setState((prevState: SelectState, props: SelectProps) => {
+            const newOptions: OptionData[] = [...prevState.registeredOptions, optionData];
+            const newValue: string = this.getFormattedValueString(
+                prevState.selectedOptionIds,
+                newOptions
+            );
+            return {
+                registeredOptions: newOptions,
+                value: newValue,
+            };
         });
     };
 
     /**
-     * Handle the keydown event of the item
+     * Function called by child select options to unregister themselves
      */
-
-    private handleOptionClick = (e: React.MouseEvent<HTMLDivElement>): void => {
-        // if (this.props.disabled) {
-        //     return;
-        // }
-        // if (typeof this.props.onInvoke === "function") {
-        //     this.props.onInvoke(this.props);
-        // }
-        alert("clickCap");
-        this.setState({
-            isMenuOpen: false,
+    protected unregisterOption = (optionId: string): void => {
+        this.setState((prevState: SelectState, props: SelectProps) => {
+            return {
+                registeredOptions: prevState.registeredOptions.filter(
+                    (option: OptionData) => {
+                        return option.id !== option.id;
+                    }
+                ),
+            };
         });
+    };
+
+    /**
+     * Function called by child select options when they have been invoked in single selection mode
+     */
+    protected selectSingleModeOptionInvoked = (optionId: string): void => {
+        this.setState({
+            selectedOptionIds: [optionId],
+            value: this.getFormattedValueString([optionId], this.state.registeredOptions),
+            isMenuOpen: this.getMenuOpenValue(false),
+        });
+    };
+
+    /**
+     * Function called by child select options when they have been invoked in multi selection mode
+     */
+    protected selectMultiModeOptionInvoked = (optionId: string): void => {
+        // TODO
+    };
+
+    /**
+     * Function that renders the child nodes when the menu is collaped
+     */
+    private hiddenMenuRenderFunction = (children: React.ReactNode): React.ReactNode => {
+        return (
+            <div
+                style={{
+                    display: "none",
+                }}
+            >
+                {children}
+            </div>
+        );
+    };
+
+    /**
+     * Determines what the isMenuOpen state value should be
+     * (ie. setting value in props overrides component interaction)
+     */
+    private getMenuOpenValue = (newValue: boolean): boolean => {
+        return this.props.isMenuOpen === undefined ? newValue : this.props.isMenuOpen;
+    };
+
+    /**
+     * Determines what function needs to be called to format the result string and
+     * calls it with the appropriate params
+     */
+    private getFormattedValueString = (
+        selectedOptionIds: string[],
+        options: OptionData[]
+    ): string => {
+        const selectedOptions: OptionData[] = options.filter((option: OptionData) => {
+            return selectedOptionIds.indexOf(option.id) !== -1;
+        });
+        const selectedValues: string[] = selectedOptions.map((option: OptionData) => {
+            return option.value;
+        });
+
+        return this.props.dataValueFormatterFunction === undefined
+            ? this.defaultDataValueFormatter(selectedValues, this.props.name)
+            : this.props.dataValueFormatterFunction(selectedValues, this.props.name);
     };
 }
 
