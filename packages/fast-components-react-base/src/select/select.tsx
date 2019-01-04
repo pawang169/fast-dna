@@ -89,7 +89,6 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
                     value={{
                         selectedOptionIds: this.state.selectedOptionIds,
                         registerOption: this.registerOption,
-                        unregisterOption: this.unregisterOption,
                         optionInvoked: invokeFunction,
                         isMenuOpen: this.state.isMenuOpen,
                     }}
@@ -244,30 +243,29 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         };
 
         this.setState((prevState: SelectState, props: SelectProps) => {
-            const newOptions: OptionData[] = [...prevState.registeredOptions, optionData];
-            const newValue: string = this.getFormattedValueString(
-                prevState.selectedOptionIds,
-                newOptions
-            );
-            return {
-                registeredOptions: newOptions,
-                value: newValue,
-            };
-        });
-    };
-
-    /**
-     * Function called by child select options to unregister themselves
-     */
-    protected unregisterOption = (optionId: string): void => {
-        this.setState((prevState: SelectState, props: SelectProps) => {
-            return {
-                registeredOptions: prevState.registeredOptions.filter(
-                    (option: OptionData) => {
-                        return option.id !== option.id;
-                    }
-                ),
-            };
+            if (
+                prevState.registeredOptions.filter((option: OptionData) => {
+                    return option.id === optionId;
+                }).length === 0
+            ) {
+                const newOptions: OptionData[] = [
+                    ...prevState.registeredOptions,
+                    optionData,
+                ];
+                const newValue: string = this.getFormattedValueString(
+                    prevState.selectedOptionIds,
+                    newOptions
+                );
+                return {
+                    registeredOptions: newOptions,
+                    value: newValue,
+                };
+            } else {
+                return {
+                    registeredOptions: prevState.registeredOptions,
+                    value: prevState.value,
+                };
+            }
         });
     };
 

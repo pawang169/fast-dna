@@ -40,13 +40,6 @@ class SelectOption extends Foundation<
     }
 
     /**
-     * React life cycle function
-     */
-    public componentWillUnmount(): void {
-        (this.context as SelectContextType).unregisterOption(this.props.id);
-    }
-
-    /**
      * Renders the component
      */
     public render(): React.ReactElement<HTMLDivElement> {
