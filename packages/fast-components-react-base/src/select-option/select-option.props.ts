@@ -3,7 +3,6 @@ import {
     ManagedClasses,
     SelectOptionClassNameContract,
 } from "@microsoft/fast-components-class-name-contracts-base";
-import { Omit } from "utility-types";
 
 export interface SelectOptionManagedClasses
     extends ManagedClasses<SelectOptionClassNameContract> {}
@@ -29,6 +28,11 @@ export interface SelectOptionHandledProps extends SelectOptionManagedClasses {
      * The unique id for the option
      */
     id: string;
+
+    /**
+     * Friendly string that may be used in ui display
+     */
+    displayString?: string;
 }
 
 export type SelectOptionProps = SelectOptionHandledProps & SelectOptionUnhandledProps;

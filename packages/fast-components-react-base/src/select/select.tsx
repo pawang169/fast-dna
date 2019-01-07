@@ -2,22 +2,13 @@ import * as React from "react";
 import Foundation, { HandledProps } from "@microsoft/fast-components-foundation-react";
 import { get, inRange, invert } from "lodash-es";
 import { SelectClassNameContract } from "@microsoft/fast-components-class-name-contracts-base";
-import {
-    OptionData,
-    SelectHandledProps,
-    SelectProps,
-    SelectUnhandledProps,
-} from "./select.props";
-import SelectOption, { SelectOptionHandledProps } from "../select-option/select-option";
-import { SelectContext, SelectContextType } from "./select.context";
-import { canUseDOM } from "exenv-es6";
-import value from "*.json";
+import { SelectHandledProps, SelectProps, SelectUnhandledProps } from "./select.props";
+import { SelectContext, SelectOptionData } from "./select.context";
 
 export interface SelectState {
     value: string;
-    selectedOptionIds: string[];
+    selectedOptions: SelectOptionData[];
     isMenuOpen: boolean;
-    registeredOptions: OptionData[];
 }
 
 class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, SelectState> {
@@ -26,7 +17,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     public static defaultProps: Partial<SelectProps> = {
         multiple: false,
         disabled: false,
-        selectedOptionIds: [],
+        selectedOptions: [],
         defaultSelection: [],
     };
 
@@ -45,7 +36,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         dataValueFormatterFunction: void 0,
         required: void 0,
         managedClasses: void 0,
-        selectedOptionIds: void 0,
+        selectedOptions: void 0,
         defaultSelection: void 0,
     };
 
@@ -60,10 +51,9 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         super(props);
 
         this.state = {
-            selectedOptionIds: this.props.defaultSelection,
+            selectedOptions: this.props.defaultSelection,
             value: "",
             isMenuOpen: this.getMenuOpenValue(false),
-            registeredOptions: [],
         };
     }
 
@@ -71,7 +61,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      * Renders the component
      */
     public render(): React.ReactElement<HTMLDivElement> {
-        const invokeFunction: (optionId: string) => void = this.props.multiple
+        const invokeFunction: (option: SelectOptionData) => void = this.props.multiple
             ? this.selectMultiModeOptionInvoked
             : this.selectSingleModeOptionInvoked;
 
@@ -83,16 +73,15 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
                 className={this.generateClassNames()}
                 onClick={this.selectClicked}
             >
-                {this.renderContentDisplay()}
-                {this.renderHiddenSelectElement()}
                 <SelectContext.Provider
                     value={{
-                        selectedOptionIds: this.state.selectedOptionIds,
-                        registerOption: this.registerOption,
+                        selectedOptions: this.state.selectedOptions,
                         optionInvoked: invokeFunction,
                         isMenuOpen: this.state.isMenuOpen,
                     }}
                 >
+                    {this.renderContentDisplay()}
+                    {this.renderHiddenSelectElement()}
                     {this.renderMenu()}
                 </SelectContext.Provider>
             </div>
@@ -122,14 +111,12 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     protected renderContentDisplay(): React.ReactNode {
         if (this.props.contentDisplayRenderFunction !== undefined) {
             return this.props.contentDisplayRenderFunction(
-                this.state.selectedOptionIds,
-                this.state.registeredOptions,
+                this.state.selectedOptions,
                 this.state.value
             );
         } else {
             return this.defaultDisplayRenderFunction(
-                this.state.selectedOptionIds,
-                this.state.registeredOptions,
+                this.state.selectedOptions,
                 this.state.value
             );
         }
@@ -139,9 +126,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      * Deternmines which function to use to render the menu and invokes it
      */
     protected renderMenu(): React.ReactNode {
-        if (!this.state.isMenuOpen) {
-            return this.hiddenMenuRenderFunction(this.props.children);
-        } else {
+        if (this.state.isMenuOpen) {
             if (this.props.menuRenderFunction === undefined) {
                 return this.defaultMenuRenderFunction(this.props.children);
             } else {
@@ -170,14 +155,32 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      * The default function that renders an unstyled content display
      */
     protected defaultDisplayRenderFunction = (
-        selectedOptionIds: string[],
-        registeredOptions: OptionData[],
+        selectedOptions: SelectOptionData[],
         formattedValue: string
     ): React.ReactNode => {
-        if (formattedValue.length === 0) {
+        if (selectedOptions.length === 0) {
             return "-----------";
         } else {
-            return formattedValue;
+            const displayStrings: string[] = selectedOptions.map(
+                (option: SelectOptionData) => {
+                    if (option.displayString !== undefined) {
+                        return option.displayString;
+                    } else {
+                        return option.value;
+                    }
+                }
+            );
+
+            const separator: string = ", ";
+            let displayString: string = "";
+            displayStrings.forEach((option: string) => {
+                if (displayString.length > 0) {
+                    displayString = displayString + separator;
+                }
+                displayString = displayString + option;
+            });
+
+            return displayString;
         }
     };
 
@@ -234,48 +237,12 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     };
 
     /**
-     * Function called by child select options to register themselves
-     */
-    protected registerOption = (optionId: string, optionValue: string): void => {
-        const optionData: OptionData = {
-            id: optionId,
-            value: optionValue,
-        };
-
-        this.setState((prevState: SelectState, props: SelectProps) => {
-            if (
-                prevState.registeredOptions.filter((option: OptionData) => {
-                    return option.id === optionId;
-                }).length === 0
-            ) {
-                const newOptions: OptionData[] = [
-                    ...prevState.registeredOptions,
-                    optionData,
-                ];
-                const newValue: string = this.getFormattedValueString(
-                    prevState.selectedOptionIds,
-                    newOptions
-                );
-                return {
-                    registeredOptions: newOptions,
-                    value: newValue,
-                };
-            } else {
-                return {
-                    registeredOptions: prevState.registeredOptions,
-                    value: prevState.value,
-                };
-            }
-        });
-    };
-
-    /**
      * Function called by child select options when they have been invoked in single selection mode
      */
-    protected selectSingleModeOptionInvoked = (optionId: string): void => {
+    protected selectSingleModeOptionInvoked = (option: SelectOptionData): void => {
         this.setState({
-            selectedOptionIds: [optionId],
-            value: this.getFormattedValueString([optionId], this.state.registeredOptions),
+            selectedOptions: [option],
+            value: this.getFormattedValueString([option]),
             isMenuOpen: this.getMenuOpenValue(false),
         });
     };
@@ -283,23 +250,8 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     /**
      * Function called by child select options when they have been invoked in multi selection mode
      */
-    protected selectMultiModeOptionInvoked = (optionId: string): void => {
+    protected selectMultiModeOptionInvoked = (option: SelectOptionData): void => {
         // TODO
-    };
-
-    /**
-     * Function that renders the child nodes when the menu is collaped
-     */
-    private hiddenMenuRenderFunction = (children: React.ReactNode): React.ReactNode => {
-        return (
-            <div
-                style={{
-                    display: "none",
-                }}
-            >
-                {children}
-            </div>
-        );
     };
 
     /**
@@ -314,16 +266,12 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      * Determines what function needs to be called to format the result string and
      * calls it with the appropriate params
      */
-    private getFormattedValueString = (
-        selectedOptionIds: string[],
-        options: OptionData[]
-    ): string => {
-        const selectedOptions: OptionData[] = options.filter((option: OptionData) => {
-            return selectedOptionIds.indexOf(option.id) !== -1;
-        });
-        const selectedValues: string[] = selectedOptions.map((option: OptionData) => {
-            return option.value;
-        });
+    private getFormattedValueString = (selectedOptions: SelectOptionData[]): string => {
+        const selectedValues: string[] = selectedOptions.map(
+            (option: SelectOptionData) => {
+                return option.value;
+            }
+        );
 
         return this.props.dataValueFormatterFunction === undefined
             ? this.defaultDataValueFormatter(selectedValues, this.props.name)

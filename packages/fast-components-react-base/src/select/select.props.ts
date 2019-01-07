@@ -3,15 +3,10 @@ import {
     ManagedClasses,
     SelectClassNameContract,
 } from "@microsoft/fast-components-class-name-contracts-base";
-import SelectOption from "../select-option/select-option";
+import { SelectOptionData } from "./select.context";
 
 export interface SelectManagedClasses extends ManagedClasses<SelectClassNameContract> {}
 export interface SelectUnhandledProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-export interface OptionData {
-    id: string;
-    value: string;
-}
 
 export interface SelectHandledProps extends SelectManagedClasses {
     /**
@@ -23,8 +18,7 @@ export interface SelectHandledProps extends SelectManagedClasses {
      * Function which renders the base display of the control
      */
     contentDisplayRenderFunction?: (
-        selectedOptionIds: string[],
-        selectedOptionData: OptionData[],
+        selectedOptions: SelectOptionData[],
         value: string
     ) => React.ReactNode;
 
@@ -41,12 +35,12 @@ export interface SelectHandledProps extends SelectManagedClasses {
     /**
      * Selected option id's (controlled mode)
      */
-    selectedOptionIds?: string[];
+    selectedOptions?: SelectOptionData[];
 
     /**
      * Id's that are initially selected
      */
-    defaultSelection?: string[];
+    defaultSelection?: SelectOptionData[];
 
     /**
      * Specifies that the drop-down list should automatically get focus when the page loads

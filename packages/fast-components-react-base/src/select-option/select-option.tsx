@@ -7,7 +7,11 @@ import {
     SelectOptionProps,
     SelectOptionUnhandledProps,
 } from "./select-option.props";
-import { SelectContext, SelectContextType } from "../select/select.context";
+import {
+    SelectContext,
+    SelectContextType,
+    SelectOptionData,
+} from "../select/select.context";
 
 class SelectOption extends Foundation<
     SelectOptionHandledProps,
@@ -24,41 +28,33 @@ class SelectOption extends Foundation<
 
     protected handledProps: HandledProps<SelectOptionHandledProps> = {
         disabled: void 0,
-        value: void 0,
+        displayString: void 0,
         managedClasses: void 0,
         id: void 0,
+        value: void 0,
     };
-
-    /**
-     * React life cycle function
-     */
-    public componentDidMount(): void {
-        (this.context as SelectContextType).registerOption(
-            this.props.id,
-            this.props.value
-        );
-    }
 
     /**
      * Renders the component
      */
     public render(): React.ReactElement<HTMLDivElement> {
-        const shouldShowChildren: boolean = (this.context as SelectContextType)
-            .isMenuOpen;
-        const shouldShowSelected: boolean =
-            (this.context as SelectContextType).selectedOptionIds.indexOf(
-                this.props.id
-            ) !== -1;
+        const isSelected: boolean =
+            (this.context as SelectContextType).selectedOptions.filter(
+                (option: SelectOptionData) => {
+                    return option.id === this.props.id;
+                }
+            ).length === 1;
         return (
             <div
                 {...this.unhandledProps()}
                 className={this.generateClassNames()}
                 role="option"
-                aria-selected={shouldShowSelected}
+                aria-selected={isSelected}
                 aria-disabled={this.props.disabled}
                 onClick={this.handleClick}
             >
-                {shouldShowChildren ? this.props.children : null}
+                {this.props.displayString}
+                {this.props.children}
             </div>
         );
     }
@@ -70,7 +66,15 @@ class SelectOption extends Foundation<
         if (this.props.disabled) {
             return;
         }
-        (this.context as SelectContextType).optionInvoked(this.props.id);
+
+        const optionData: SelectOptionData = {
+            id: this.props.id,
+            value: this.props.value,
+            displayString: this.props.displayString,
+        };
+
+        //  TODO: confirm this is a valid function
+        (this.context as SelectContextType).optionInvoked(optionData);
     }
 
     /**
@@ -78,6 +82,7 @@ class SelectOption extends Foundation<
      */
     protected generateClassNames(): string {
         let classNames: string = get(this.props, "managedClasses.selectOption", "");
+
         if (this.props.disabled) {
             classNames = `${classNames} ${get(
                 this.props,
@@ -85,17 +90,22 @@ class SelectOption extends Foundation<
                 ""
             )}`;
         }
-        if (
-            (this.context as SelectContextType).selectedOptionIds.indexOf(
-                this.props.id
-            ) !== -1
-        ) {
+
+        const isSelected: boolean =
+            (this.context as SelectContextType).selectedOptions.filter(
+                (option: SelectOptionData) => {
+                    return option.id === this.props.id;
+                }
+            ).length === 1;
+
+        if (isSelected) {
             classNames = `${classNames} ${get(
                 this.props,
                 "managedClasses.selectOption__selected",
                 ""
             )}`;
         }
+
         return super.generateClassNames(classNames);
     }
 

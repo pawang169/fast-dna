@@ -6,13 +6,14 @@ import { SelectOptionProps } from "../select-option";
 import { noop } from "lodash-es";
 import Documentation from "./.tmp/documentation";
 
-function selectOptionPropFactory(exampleValue: string): SelectOptionProps {
+function selectOptionPropFactory(optionId: string): SelectOptionProps {
     return {
         managedClasses: {
             selectOption: "select-option",
         },
-        value: exampleValue,
-        id: exampleValue,
+        value: "value - " + optionId,
+        id: optionId,
+        displayString: "Display - " + optionId,
     };
 }
 
@@ -33,23 +34,22 @@ const examples: ComponentFactoryExample<SelectProps> = {
             {
                 id: "select-option",
                 props: {
-                    ...selectOptionPropFactory("value 1"),
-                    children: "select option 1",
-                    selected: true,
+                    ...selectOptionPropFactory("1"),
+                    children: "select option 1 child",
                 },
             },
             {
                 id: "select-option",
                 props: {
-                    ...selectOptionPropFactory("value 2"),
-                    children: "select option 2",
+                    ...selectOptionPropFactory("2"),
+                    children: "select option 2 child",
                 },
             },
             {
                 id: "select-option",
                 props: {
-                    ...selectOptionPropFactory("value 3"),
-                    children: "select option 3",
+                    ...selectOptionPropFactory("3"),
+                    children: "select option 3 child",
                 },
             },
         ],

@@ -9,21 +9,17 @@
             "title": "Disabled",
             "type": "boolean"
         },
-        "fixed": {
-            "title": "Fixed",
-            "type": "boolean"
+        "displayString": {
+            "title": "Display string",
+            "type": "string"
         },
-        "selected": {
-            "title": "Selected",
-            "type": "boolean"
+        "id": {
+            "title": "Id",
+            "type": "string"
         },
         "value": {
             "title": "Value",
             "type": "string"
-        },
-        "initiallySelected": {
-            "title": "Initially Selected",
-            "type": "boolean"
         }
     },
     "reactProperties": {
