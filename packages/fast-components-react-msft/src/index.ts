@@ -20,6 +20,7 @@ export * from "./paragraph";
 export * from "./progress";
 export * from "./radio";
 export * from "./subheading";
+export * from "./select-option";
 export * from "./text-action";
 export * from "./text-area";
 export * from "./text-field";

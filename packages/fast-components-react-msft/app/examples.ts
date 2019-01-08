@@ -64,6 +64,9 @@ export { RadioExamples };
 import SubheadingExamples from "../src/subheading/examples.data";
 export { SubheadingExamples };
 
+import SelectOptionExamples from "../src/select-option/examples.data";
+export { SelectOptionExamples };
+
 import ToggleExamples from "../src/toggle/examples.data";
 export { ToggleExamples };
 

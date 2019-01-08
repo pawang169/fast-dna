@@ -4,7 +4,7 @@ import {
     CSSRules,
 } from "@microsoft/fast-jss-manager";
 import { applyTypeRampConfig } from "../utilities/typography";
-import { ButtonClassNameContract } from "@microsoft/fast-components-class-name-contracts-msft";
+import { SelectOptionClassNameContract } from "@microsoft/fast-components-class-name-contracts-msft";
 import {
     adjustContrast,
     applyLocalizedProperty,
@@ -37,10 +37,13 @@ import { density } from "../utilities/density";
 import { defaultHeight, maxHeight, minHeight } from "../utilities/height";
 import outlinePattern from "../patterns/outline";
 
-const styles: ComponentStyles<ButtonClassNameContract, DesignSystem> = (
+const styles: ComponentStyles<SelectOptionClassNameContract, DesignSystem> = (
     config: DesignSystem
-): ComponentStyleSheet<ButtonClassNameContract, DesignSystem> => {
-    return {};
+): ComponentStyleSheet<SelectOptionClassNameContract, DesignSystem> => {
+    return {
+        selectOption: {},
+        selectOption__disabled: {},
+    };
 };
 
 export default styles;
