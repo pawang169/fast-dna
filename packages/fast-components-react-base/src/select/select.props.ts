@@ -25,7 +25,10 @@ export interface SelectHandledProps extends SelectManagedClasses {
     /**
      * Function which renders the menu display of the control
      */
-    menuRenderFunction?: (children: React.ReactNode) => React.ReactNode;
+    menuRenderFunction?: (
+        selectedOptions: SelectOptionData[],
+        children: React.ReactNode
+    ) => React.ReactNode;
 
     /**
      * Function which converts and formats the string[] selected values to a the string value to be returned by the control (ie. what gets sent back as a form result)

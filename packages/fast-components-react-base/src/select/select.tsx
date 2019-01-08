@@ -128,9 +128,15 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     protected renderMenu(): React.ReactNode {
         if (this.state.isMenuOpen) {
             if (this.props.menuRenderFunction === undefined) {
-                return this.defaultMenuRenderFunction(this.props.children);
+                return this.defaultMenuRenderFunction(
+                    this.state.selectedOptions,
+                    this.props.children
+                );
             } else {
-                return this.props.menuRenderFunction(this.props.children);
+                return this.props.menuRenderFunction(
+                    this.state.selectedOptions,
+                    this.props.children
+                );
             }
         }
     }
@@ -188,6 +194,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      * The default function that renders an unstyled menu
      */
     protected defaultMenuRenderFunction = (
+        selectedOptions: SelectOptionData[],
         children: React.ReactNode
     ): React.ReactNode => {
         return (
