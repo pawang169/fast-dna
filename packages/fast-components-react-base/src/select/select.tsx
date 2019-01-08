@@ -105,43 +105,6 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     }
 
     /**
-     * Deternmines which function to use to render content display (ie. the part of the control that shows when the menu isn't open)
-     * and invokes it
-     */
-    protected renderContentDisplay(): React.ReactNode {
-        if (this.props.contentDisplayRenderFunction !== undefined) {
-            return this.props.contentDisplayRenderFunction(
-                this.state.selectedOptions,
-                this.state.value
-            );
-        } else {
-            return this.defaultDisplayRenderFunction(
-                this.state.selectedOptions,
-                this.state.value
-            );
-        }
-    }
-
-    /**
-     * Deternmines which function to use to render the menu and invokes it
-     */
-    protected renderMenu(): React.ReactNode {
-        if (this.state.isMenuOpen) {
-            if (this.props.menuRenderFunction === undefined) {
-                return this.defaultMenuRenderFunction(
-                    this.state.selectedOptions,
-                    this.props.children
-                );
-            } else {
-                return this.props.menuRenderFunction(
-                    this.state.selectedOptions,
-                    this.props.children
-                );
-            }
-        }
-    }
-
-    /**
      * Renders a hidden select element which can interact with a
      * form hosting this component
      */
@@ -158,9 +121,46 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     }
 
     /**
+     * Deternmines which function to use to render content display (ie. the part of the control that shows when the menu isn't open)
+     * and invokes it
+     */
+    private renderContentDisplay(): React.ReactNode {
+        if (this.props.contentDisplayRenderFunction !== undefined) {
+            return this.props.contentDisplayRenderFunction(
+                this.state.selectedOptions,
+                this.state.value
+            );
+        } else {
+            return this.defaultDisplayRenderFunction(
+                this.state.selectedOptions,
+                this.state.value
+            );
+        }
+    }
+
+    /**
+     * Deternmines which function to use to render the menu and invokes it
+     */
+    private renderMenu(): React.ReactNode {
+        if (this.state.isMenuOpen) {
+            if (this.props.menuRenderFunction === undefined) {
+                return this.defaultMenuRenderFunction(
+                    this.state.selectedOptions,
+                    this.props.children
+                );
+            } else {
+                return this.props.menuRenderFunction(
+                    this.state.selectedOptions,
+                    this.props.children
+                );
+            }
+        }
+    }
+
+    /**
      * The default function that renders an unstyled content display
      */
-    protected defaultDisplayRenderFunction = (
+    private defaultDisplayRenderFunction = (
         selectedOptions: SelectOptionData[],
         formattedValue: string
     ): React.ReactNode => {
@@ -193,7 +193,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     /**
      * The default function that renders an unstyled menu
      */
-    protected defaultMenuRenderFunction = (
+    private defaultMenuRenderFunction = (
         selectedOptions: SelectOptionData[],
         children: React.ReactNode
     ): React.ReactNode => {
@@ -216,7 +216,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      * This implementation should match the default formatting a base html select control applies.
      * Developpers can provide different formatters if desired.
      */
-    protected defaultDataValueFormatter = (
+    private defaultDataValueFormatter = (
         selectedValues: string[],
         selectName: string
     ): string => {
@@ -235,7 +235,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     /**
      * Handles clicks on the base display
      */
-    protected selectClicked = (): void => {
+    private selectClicked = (): void => {
         if (!this.props.disabled) {
             this.setState({
                 isMenuOpen: this.getMenuOpenValue(true),
@@ -246,7 +246,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     /**
      * Function called by child select options when they have been invoked in single selection mode
      */
-    protected selectSingleModeOptionInvoked = (option: SelectOptionData): void => {
+    private selectSingleModeOptionInvoked = (option: SelectOptionData): void => {
         this.setState({
             selectedOptions: [option],
             value: this.getFormattedValueString([option]),
@@ -257,7 +257,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     /**
      * Function called by child select options when they have been invoked in multi selection mode
      */
-    protected selectMultiModeOptionInvoked = (option: SelectOptionData): void => {
+    private selectMultiModeOptionInvoked = (option: SelectOptionData): void => {
         // TODO
     };
 

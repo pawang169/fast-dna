@@ -35,9 +35,12 @@ class SelectOption extends Foundation<
             <BaseSelectOption
                 {...this.unhandledProps()}
                 className={this.generateClassNames()}
+                value={this.props.value}
+                id={this.props.id}
+                displayString={this.props.displayString}
                 managedClasses={this.props.managedClasses}
             >
-                Banana
+                {this.props.children}
             </BaseSelectOption>
         );
     }

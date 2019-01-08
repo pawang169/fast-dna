@@ -1,0 +1,17 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "title": "Listbox",
+    "description": "A listbox component's schema definition.",
+    "type": "object",
+    "id": "listbox",
+    "properties": {
+    },
+    "reactProperties": {
+        "children": {
+            "title": "Building blocks",
+            "type": "children",
+            "ids": [
+            ]
+        }
+    }
+}

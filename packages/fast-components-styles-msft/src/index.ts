@@ -104,6 +104,12 @@ export { RadioStyles };
 /**
  * Export select option styles
  */
+import SelectStyles from "./select-option";
+export { SelectStyles };
+
+/**
+ * Export select option styles
+ */
 import SelectOptionStyles from "./select-option";
 export { SelectOptionStyles };
 

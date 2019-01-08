@@ -6,8 +6,8 @@ import {
     SelectOptionUnhandledProps as BaseSelectOptionUnhandledProps,
 } from "@microsoft/fast-components-react-base";
 import {
-    SelectOptionClassNameContract,
     ManagedClasses,
+    SelectOptionClassNameContract,
 } from "@microsoft/fast-components-class-name-contracts-msft";
 
 export interface SelectOptionManagedClasses
