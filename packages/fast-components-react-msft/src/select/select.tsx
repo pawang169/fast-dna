@@ -3,6 +3,7 @@ import Foundation, { HandledProps } from "@microsoft/fast-components-foundation-
 import { get } from "lodash-es";
 import { SelectHandledProps, SelectProps, SelectUnhandledProps } from "./select.props";
 import {
+    Listbox,
     Select as BaseSelect,
     SelectOptionData,
 } from "@microsoft/fast-components-react-base";
@@ -37,7 +38,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, {}> {
                 {...this.unhandledProps()}
                 className={this.generateClassNames()}
                 contentDisplayRenderFunction={this.renderContentDisplay}
-                menuRenderFunction={this.renderMenu}
+                // menuRenderFunction={this.renderMenu}
                 managedClasses={this.props.managedClasses}
             >
                 {this.props.children}
@@ -88,22 +89,11 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, {}> {
     /**
      * Render the menu
      */
-    protected renderMenu = (
+    private renderMenu = (
         selectedOptions: SelectOptionData[],
         children: React.ReactNode
     ): React.ReactNode => {
-        return (
-            <div
-                style={{
-                    width: "100%",
-                    height: "auto",
-                    background: "white",
-                    position: "absolute",
-                }}
-            >
-                {children}
-            </div>
-        );
+        return <Listbox typeAheadPropName="displayString">{children}</Listbox>;
     };
 }
 

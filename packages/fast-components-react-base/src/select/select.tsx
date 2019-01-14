@@ -39,6 +39,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         managedClasses: void 0,
         selectedOptions: void 0,
         defaultSelection: void 0,
+        onChange: void 0,
     };
 
     private rootElement: React.RefObject<HTMLDivElement> = React.createRef<
@@ -109,17 +110,24 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      * Renders a hidden select element which can interact with a
      * form hosting this component
      */
-    protected renderHiddenSelectElement(): React.ReactNode {
+    private renderHiddenSelectElement(): React.ReactNode {
         return (
             <select
                 name={this.props.name}
                 value={this.state.value}
+                onChange={this.handleValueChange}
                 style={{
                     display: "none",
                 }}
             />
         );
     }
+
+    private handleValueChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+        if (typeof this.props.onChange === "function") {
+            this.props.onChange(e);
+        }
+    };
 
     /**
      * Deternmines which function to use to render content display (ie. the part of the control that shows when the menu isn't open)
@@ -237,6 +245,10 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      * Function called by child select options when they have been invoked in single selection mode
      */
     private selectSingleModeOptionInvoked = (option: SelectOptionData): void => {
+        if (this.state.selectedOptions === [option]) {
+            return;
+        }
+
         this.setState({
             selectedOptions: [option],
             value: this.getFormattedValueString([option]),

@@ -9,7 +9,7 @@ function selectOptionPropFactory(optionId: string): SelectOptionProps {
     return {
         value: "value - " + optionId,
         id: optionId,
-        displayString: "Display - " + optionId,
+        displayString: "Option-" + optionId,
     };
 }
 
@@ -30,25 +30,22 @@ const examples: ComponentFactoryExample<SelectHandledProps> = {
             {
                 id: "select-option",
                 props: {
-                    ...selectOptionPropFactory("1"),
+                    ...selectOptionPropFactory("A"),
                     managedClasses: { selectOption: "select-option" },
-                    children: "select option 1 child",
                 },
             },
             {
                 id: "select-option",
                 props: {
-                    ...selectOptionPropFactory("2"),
+                    ...selectOptionPropFactory("B"),
                     managedClasses: { selectOption: "select-option" },
-                    children: "select option 2 child",
                 },
             },
             {
                 id: "select-option",
                 props: {
-                    ...selectOptionPropFactory("3"),
+                    ...selectOptionPropFactory("C"),
                     managedClasses: { selectOption: "select-option" },
-                    children: "select option 3 child",
                 },
             },
         ],

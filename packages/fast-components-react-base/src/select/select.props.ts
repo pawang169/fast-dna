@@ -79,6 +79,11 @@ export interface SelectHandledProps extends SelectManagedClasses {
      * Specifies that the user is required to select a value before submitting the form
      */
     required?: boolean;
+
+    /**
+     * The onChange event handler
+     */
+    onChange?: (event?: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
 export type SelectProps = SelectHandledProps & SelectUnhandledProps;
