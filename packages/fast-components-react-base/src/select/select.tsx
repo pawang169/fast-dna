@@ -4,6 +4,7 @@ import { get, inRange, invert } from "lodash-es";
 import { SelectClassNameContract } from "@microsoft/fast-components-class-name-contracts-base";
 import { SelectHandledProps, SelectProps, SelectUnhandledProps } from "./select.props";
 import { SelectContext, SelectOptionData } from "./select.context";
+import Listbox from "../listbox";
 
 export interface SelectState {
     value: string;
@@ -197,18 +198,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         selectedOptions: SelectOptionData[],
         children: React.ReactNode
     ): React.ReactNode => {
-        return (
-            <div
-                style={{
-                    width: "100%",
-                    height: "auto",
-                    background: "white",
-                    position: "absolute",
-                }}
-            >
-                {children}
-            </div>
-        );
+        return <Listbox typeAheadPropName="displayString">{children}</Listbox>;
     };
 
     /**
@@ -236,7 +226,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      * Handles clicks on the base display
      */
     private selectClicked = (): void => {
-        if (!this.props.disabled) {
+        if (!this.props.disabled && !this.state.isMenuOpen) {
             this.setState({
                 isMenuOpen: this.getMenuOpenValue(true),
             });

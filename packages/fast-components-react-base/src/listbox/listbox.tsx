@@ -25,18 +25,22 @@ class Listbox extends Foundation<
 > {
     public static displayName: string = "Listbox";
 
-    // private static focusableElementRoles: { [key: string]: string } = invert(
-    //     ContextMenuItemRole
-    // );
+    public static defaultProps: Partial<ListboxProps> = {
+        typeAheadPropName: "value",
+    };
 
     protected handledProps: HandledProps<ListboxHandledProps> = {
         children: void 0,
         managedClasses: void 0,
+        typeAheadPropName: void 0,
     };
 
     private rootElement: React.RefObject<HTMLDivElement> = React.createRef<
         HTMLDivElement
     >();
+
+    private typeAheadString: string = "";
+    private typeAheadTimer: any;
 
     constructor(props: ListboxProps) {
         super(props);
@@ -74,6 +78,10 @@ class Listbox extends Foundation<
         }
     }
 
+    public componentWillUnmount(): void {
+        clearTimeout(this.typeAheadTimer);
+    }
+
     /**
      * Create class names
      */
@@ -92,7 +100,7 @@ class Listbox extends Foundation<
      * Render a single child
      */
     private renderChild = (
-        child: React.ReactElement<ListboxItemProps>,
+        child: React.ReactElement<any>,
         index: number
     ): React.ReactChild => {
         return React.cloneElement(child, {
@@ -102,10 +110,7 @@ class Listbox extends Foundation<
     };
 
     private isMenuItemElement(element: Element): element is HTMLElement {
-        return (
-            element instanceof HTMLElement &&
-            ContextMenu.focusableElementRoles.hasOwnProperty(element.getAttribute("role"))
-        );
+        return element instanceof HTMLElement;
     }
 
     /**
@@ -208,10 +213,146 @@ class Listbox extends Foundation<
                 this.setFocus(0, 1);
 
                 break;
+
+            case KeyCodes.home:
+                e.preventDefault();
+                this.setFocus(0, 1);
+
+                break;
+
+            default:
+                this.processTypeAhead(e);
         }
+    };
+
+    private processTypeAhead = (e: React.KeyboardEvent<HTMLDivElement>): void => {
+        // TODO: how to sort out keys we care about & not (roughed this in)
+        const acceptedChars: string[] = [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "i",
+            "j",
+            "k",
+            "l",
+            "m",
+            "n",
+            "o",
+            "p",
+            "q",
+            "r",
+            "s",
+            "t",
+            "u",
+            "v",
+            "w",
+            "x",
+            "y",
+            "z",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "0",
+        ];
+
+        if (acceptedChars.indexOf(e.key) === -1) {
+            return;
+        }
+
+        e.preventDefault();
+
+        if (this.typeAheadString !== "") {
+            clearTimeout(this.typeAheadTimer);
+        }
+
+        this.typeAheadString = this.typeAheadString + e.key;
+        const children: Element[] = this.domChildren();
+        let bestMatchIndex: number = -1;
+        children.some(
+            (child: Element, index: number): boolean => {
+                if (!this.isFocusableElement(child)) {
+                    return;
+                }
+
+                let childCompareValue: string = "";
+                if (this.props.typeAheadPropName === undefined) {
+                    if (child.hasAttribute(this.props.typeAheadPropName)) {
+                        childCompareValue = child.getAttribute(
+                            this.props.typeAheadPropName
+                        );
+                    }
+                } else {
+                    // TODO: right way to do this??
+                    if (child.innerText !== undefined) {
+                        childCompareValue = child.innerText;
+                    }
+                }
+
+                if (
+                    childCompareValue !== "" &&
+                    childCompareValue.includes(this.typeAheadString)
+                ) {
+                    bestMatchIndex = index;
+                    return true;
+                }
+
+                return false;
+            }
+        );
+
+        if (bestMatchIndex !== -1) {
+            this.typeAheadTimer = setTimeout((): void => {
+                this.typeAheadTimerExpired();
+            }, 1000);
+            this.setFocus(bestMatchIndex, 1);
+        } else {
+            this.typeAheadString = "";
+        }
+    };
+
+    private typeAheadTimerExpired = (): void => {
+        this.typeAheadString = "";
+        clearTimeout(this.typeAheadTimer);
     };
 }
 
-export default ContextMenu;
-export * from "./context-menu.props";
-export { ContextMenuClassNameContract };
+export default Listbox;
+export * from "./listbox.props";
+export { ListboxClassNameContract };

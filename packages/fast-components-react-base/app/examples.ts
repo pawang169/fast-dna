@@ -34,6 +34,9 @@ export { ImageExamples };
 import LabelExamples from "../src/label/examples.data";
 export { LabelExamples };
 
+import Listbox from "../src/listbox/examples.data";
+export { Listbox };
+
 import ProgressExamples from "../src/progress/examples.data";
 export { ProgressExamples };
 

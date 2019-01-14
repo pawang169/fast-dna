@@ -12,6 +12,7 @@ import {
     SelectContextType,
     SelectOptionData,
 } from "../select/select.context";
+import { KeyCodes } from "@microsoft/fast-web-utilities";
 
 class SelectOption extends Foundation<
     SelectOptionHandledProps,
@@ -52,6 +53,7 @@ class SelectOption extends Foundation<
                 aria-selected={isSelected}
                 aria-disabled={this.props.disabled}
                 onClick={this.handleClick}
+                onKeyDown={this.handleKeyDown}
             >
                 {this.props.displayString}
                 {this.props.children}
@@ -113,8 +115,18 @@ class SelectOption extends Foundation<
      * Handle click event
      */
     private handleClick = (event: React.MouseEvent): void => {
-        event.stopPropagation();
+        event.preventDefault();
         this.invokeOption();
+    };
+
+    /**
+     * Handle keyDown
+     */
+    private handleKeyDown = (event: React.KeyboardEvent): void => {
+        if (event.keyCode === KeyCodes.enter) {
+            event.preventDefault();
+            this.invokeOption();
+        }
     };
 }
 

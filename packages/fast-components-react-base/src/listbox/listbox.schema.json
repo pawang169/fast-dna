@@ -10,7 +10,8 @@
         "children": {
             "title": "Building blocks",
             "type": "children",
-            "ids": [
+            "defaults": [
+                "text"
             ]
         }
     }
