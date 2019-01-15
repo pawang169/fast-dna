@@ -2,11 +2,15 @@ import * as React from "react";
 import { ComponentFactoryExample } from "@microsoft/fast-development-site-react";
 import schema from "./select.schema.json";
 import Select, { SelectHandledProps, SelectManagedClasses, SelectProps } from "./select";
-import { SelectOptionHandledProps, SelectOptionProps } from "../select-option";
+import { SelectOptionProps } from "../select-option";
 import Documentation from "./.tmp/documentation";
+import { SelectOptionProps as BaseSelectOptionProps } from "@microsoft/fast-components-react-base";
 
-function selectOptionPropFactory(optionId: string): SelectOptionProps {
+function selectOptionPropFactory(optionId: string): BaseSelectOptionProps {
     return {
+        managedClasses: {
+            selectOption: "select-option",
+        },
         value: "value - " + optionId,
         id: optionId,
         displayString: "Option-" + optionId,

@@ -81,9 +81,9 @@ export interface SelectHandledProps extends SelectManagedClasses {
     required?: boolean;
 
     /**
-     * The onChange event handler
+     * The onValueChange event handler (note: using "onChange" at the event name caused type conflict issues)
      */
-    onChange?: (event?: React.ChangeEvent<HTMLSelectElement>) => void;
+    onValueChange?: (event?: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
 export type SelectProps = SelectHandledProps & SelectUnhandledProps;

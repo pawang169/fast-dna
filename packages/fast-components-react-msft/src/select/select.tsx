@@ -38,7 +38,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, {}> {
                 {...this.unhandledProps()}
                 className={this.generateClassNames()}
                 contentDisplayRenderFunction={this.renderContentDisplay}
-                // menuRenderFunction={this.renderMenu}
+                menuRenderFunction={this.renderMenu}
                 managedClasses={this.props.managedClasses}
             >
                 {this.props.children}

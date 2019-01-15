@@ -1,6 +1,7 @@
 import * as React from "react";
 import Foundation, { HandledProps } from "@microsoft/fast-components-foundation-react";
-import { get, inRange, invert } from "lodash-es";
+import { get } from "lodash-es";
+import { KeyCodes } from "@microsoft/fast-web-utilities";
 import { SelectClassNameContract } from "@microsoft/fast-components-class-name-contracts-base";
 import { SelectHandledProps, SelectProps, SelectUnhandledProps } from "./select.props";
 import { SelectContext, SelectOptionData } from "./select.context";
@@ -39,7 +40,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         managedClasses: void 0,
         selectedOptions: void 0,
         defaultSelection: void 0,
-        onChange: void 0,
+        onValueChange: void 0,
     };
 
     private rootElement: React.RefObject<HTMLDivElement> = React.createRef<
@@ -55,7 +56,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         this.state = {
             selectedOptions: this.props.defaultSelection,
             value: "",
-            isMenuOpen: this.getMenuOpenValue(false),
+            isMenuOpen: this.props.isMenuOpen || false,
         };
     }
 
@@ -73,6 +74,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
                 ref={this.rootElement}
                 aria-disabled={this.props.disabled || undefined}
                 className={this.generateClassNames()}
+                onKeyDown={this.handleKeydown}
                 onClick={this.selectClicked}
             >
                 <SelectContext.Provider
@@ -123,9 +125,12 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         );
     }
 
+    /**
+     * Called when value changes on hidden select element
+     */
     private handleValueChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-        if (typeof this.props.onChange === "function") {
-            this.props.onChange(e);
+        if (this.props.onValueChange) {
+            this.props.onValueChange(e);
         }
     };
 
@@ -231,13 +236,30 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     };
 
     /**
-     * Handles clicks on the base display
+     * Handles clicks
      */
     private selectClicked = (): void => {
         if (!this.props.disabled && !this.state.isMenuOpen) {
-            this.setState({
-                isMenuOpen: this.getMenuOpenValue(true),
-            });
+            this.openMenu();
+        }
+    };
+
+    /**
+     * Handles key events
+     */
+    private handleKeydown = (e: React.KeyboardEvent<HTMLDivElement>): void => {
+        switch (e.keyCode) {
+            case KeyCodes.enter:
+            case KeyCodes.space:
+                e.preventDefault();
+                this.openMenu();
+
+                break;
+            case KeyCodes.escape:
+                e.preventDefault();
+                this.closeMenu();
+
+                break;
         }
     };
 
@@ -249,10 +271,10 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
             return;
         }
 
+        this.closeMenu();
         this.setState({
             selectedOptions: [option],
             value: this.getFormattedValueString([option]),
-            isMenuOpen: this.getMenuOpenValue(false),
         });
     };
 
@@ -264,11 +286,33 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     };
 
     /**
-     * Determines what the isMenuOpen state value should be
-     * (ie. setting value in props overrides component interaction)
+     * opens the menu when it is not controlled by props
      */
-    private getMenuOpenValue = (newValue: boolean): boolean => {
-        return this.props.isMenuOpen === undefined ? newValue : this.props.isMenuOpen;
+    private openMenu = (): void => {
+        if (this.props.isMenuOpen === undefined) {
+            window.addEventListener("click", this.handleWindowClick);
+            this.setState({
+                isMenuOpen: true,
+            });
+        }
+    };
+
+    /**
+     * closes the menu when it is not controlled by props
+     */
+    private closeMenu = (): void => {
+        if (this.props.isMenuOpen === undefined) {
+            window.removeEventListener("click", this.handleWindowClick);
+            this.setState({
+                isMenuOpen: false,
+            });
+        }
+    };
+
+    private handleWindowClick = (event: MouseEvent): void => {
+        if (!this.rootElement.current.contains(event.target as Element)) {
+            this.closeMenu();
+        }
     };
 
     /**

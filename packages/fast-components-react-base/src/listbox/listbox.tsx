@@ -18,6 +18,11 @@ export interface ListboxState {
     focusIndex: number;
 }
 
+export interface TypeAheadDataItem {
+    index: number;
+    compareString: string;
+}
+
 class Listbox extends Foundation<
     ListboxHandledProps,
     ListboxUnhandledProps,
@@ -41,6 +46,7 @@ class Listbox extends Foundation<
 
     private typeAheadString: string = "";
     private typeAheadTimer: any;
+    private typeAheadData: TypeAheadDataItem[] = [];
 
     constructor(props: ListboxProps) {
         super(props);
@@ -58,7 +64,7 @@ class Listbox extends Foundation<
             <div
                 {...this.unhandledProps()}
                 ref={this.rootElement}
-                role="menu"
+                role="listbox"
                 className={this.generateClassNames()}
                 onKeyDown={this.handleMenuKeyDown}
             >
@@ -93,6 +99,7 @@ class Listbox extends Foundation<
      * Render all child elements
      */
     private renderChildren(): React.ReactChild[] {
+        this.typeAheadData = [];
         return React.Children.map(this.props.children, this.renderChild);
     }
 
@@ -103,9 +110,14 @@ class Listbox extends Foundation<
         child: React.ReactElement<any>,
         index: number
     ): React.ReactChild => {
+        if (child.props[this.props.typeAheadPropName] !== undefined) {
+            this.typeAheadData.push({
+                index,
+                compareString: child.props[this.props.typeAheadPropName],
+            });
+        }
         return React.cloneElement(child, {
             tabIndex: index === this.state.focusIndex ? 0 : -1,
-            onFocus: this.handleMenuItemFocus,
         });
     };
 
@@ -147,7 +159,6 @@ class Listbox extends Foundation<
 
         if (this.isDisabledElement(target)) {
             target.blur();
-
             return;
         }
 
@@ -298,38 +309,15 @@ class Listbox extends Foundation<
 
         e.preventDefault();
 
-        if (this.typeAheadString !== "") {
-            clearTimeout(this.typeAheadTimer);
-        }
+        clearTimeout(this.typeAheadTimer);
 
         this.typeAheadString = this.typeAheadString + e.key;
         const children: Element[] = this.domChildren();
-        let bestMatchIndex: number = -1;
-        children.some(
-            (child: Element, index: number): boolean => {
-                if (!this.isFocusableElement(child)) {
-                    return;
-                }
-
-                let childCompareValue: string = "";
-                if (this.props.typeAheadPropName === undefined) {
-                    if (child.hasAttribute(this.props.typeAheadPropName)) {
-                        childCompareValue = child.getAttribute(
-                            this.props.typeAheadPropName
-                        );
-                    }
-                } else {
-                    // TODO: right way to do this??
-                    if (child.innerText !== undefined) {
-                        childCompareValue = child.innerText;
-                    }
-                }
-
-                if (
-                    childCompareValue !== "" &&
-                    childCompareValue.includes(this.typeAheadString)
-                ) {
-                    bestMatchIndex = index;
+        let matchIndex: number = -1;
+        this.typeAheadData.some(
+            (typeAheadData: TypeAheadDataItem, index: number): boolean => {
+                if (typeAheadData.compareString.includes(this.typeAheadString)) {
+                    matchIndex = typeAheadData.index;
                     return true;
                 }
 
@@ -337,11 +325,11 @@ class Listbox extends Foundation<
             }
         );
 
-        if (bestMatchIndex !== -1) {
+        if (matchIndex !== -1) {
             this.typeAheadTimer = setTimeout((): void => {
                 this.typeAheadTimerExpired();
             }, 1000);
-            this.setFocus(bestMatchIndex, 1);
+            this.setFocus(matchIndex, 1);
         } else {
             this.typeAheadString = "";
         }
