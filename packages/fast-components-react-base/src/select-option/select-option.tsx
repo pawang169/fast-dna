@@ -64,7 +64,9 @@ class SelectOption extends Foundation<
     /**
      * Invoke this option
      */
-    public invokeOption(): void {
+    public invokeOption(
+        event: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>
+    ): void {
         if (this.props.disabled) {
             return;
         }
@@ -76,7 +78,7 @@ class SelectOption extends Foundation<
         };
 
         //  TODO: confirm this is a valid function
-        (this.context as SelectContextType).optionInvoked(optionData);
+        (this.context as SelectContextType).optionInvoked(optionData, event);
     }
 
     /**
@@ -114,18 +116,18 @@ class SelectOption extends Foundation<
     /**
      * Handle click event
      */
-    private handleClick = (event: React.MouseEvent): void => {
+    private handleClick = (event: React.MouseEvent<HTMLDivElement>): void => {
         event.preventDefault();
-        this.invokeOption();
+        this.invokeOption(event);
     };
 
     /**
      * Handle keyDown
      */
-    private handleKeyDown = (event: React.KeyboardEvent): void => {
+    private handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>): void => {
         if (event.keyCode === KeyCodes.enter) {
             event.preventDefault();
-            this.invokeOption();
+            this.invokeOption(event);
         }
     };
 }

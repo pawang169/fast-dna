@@ -64,10 +64,6 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      * Renders the component
      */
     public render(): React.ReactElement<HTMLDivElement> {
-        const invokeFunction: (option: SelectOptionData) => void = this.props.multiple
-            ? this.selectMultiModeOptionInvoked
-            : this.selectSingleModeOptionInvoked;
-
         return (
             <div
                 {...this.unhandledProps()}
@@ -80,7 +76,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
                 <SelectContext.Provider
                     value={{
                         selectedOptions: this.state.selectedOptions,
-                        optionInvoked: invokeFunction,
+                        optionInvoked: this.selectOptionInvoked,
                         isMenuOpen: this.state.isMenuOpen,
                     }}
                 >
@@ -264,25 +260,41 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
     };
 
     /**
-     * Function called by child select options when they have been invoked in single selection mode
+     * Function called by child select options when they have been invoked
      */
-    private selectSingleModeOptionInvoked = (option: SelectOptionData): void => {
-        if (this.state.selectedOptions === [option]) {
-            return;
+    private selectOptionInvoked = (
+        option: SelectOptionData,
+        event: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>
+    ): void => {
+        if (this.props.multiple && event.ctrlKey) {
+            if (
+                this.state.selectedOptions.filter((selectedOption: SelectOptionData) => {
+                    return selectedOption.id === option.id;
+                }).length === 1
+            ) {
+                return;
+            }
+
+            const newSelectedOptions: SelectOptionData[] = Object.assign(
+                {},
+                this.state.selectedOptions,
+                [option]
+            );
+            this.setState({
+                selectedOptions: newSelectedOptions,
+                value: this.getFormattedValueString(newSelectedOptions),
+            });
+        } else {
+            if (this.state.selectedOptions === [option]) {
+                return;
+            }
+
+            this.closeMenu();
+            this.setState({
+                selectedOptions: [option],
+                value: this.getFormattedValueString([option]),
+            });
         }
-
-        this.closeMenu();
-        this.setState({
-            selectedOptions: [option],
-            value: this.getFormattedValueString([option]),
-        });
-    };
-
-    /**
-     * Function called by child select options when they have been invoked in multi selection mode
-     */
-    private selectMultiModeOptionInvoked = (option: SelectOptionData): void => {
-        // TODO
     };
 
     /**

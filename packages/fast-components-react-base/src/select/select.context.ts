@@ -8,7 +8,10 @@ export interface SelectOptionData {
 }
 
 export interface SelectContextType {
-    optionInvoked: (optionInvoked: SelectOptionData) => void;
+    optionInvoked: (
+        optionInvoked: SelectOptionData,
+        event: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>
+    ) => void;
     isMenuOpen: boolean;
     selectedOptions: SelectOptionData[];
 }
