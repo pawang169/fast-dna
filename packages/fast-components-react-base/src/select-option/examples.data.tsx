@@ -20,7 +20,6 @@ const examples: ComponentFactoryExample<SelectOptionHandledProps> = {
     documentation: <Documentation />,
     detailData: {
         ...managedClasses,
-        children: "test child",
         value: "Test value",
         displayString: "Test Display",
         id: "TestID",
@@ -28,7 +27,6 @@ const examples: ComponentFactoryExample<SelectOptionHandledProps> = {
     data: [
         {
             ...managedClasses,
-            children: "test child",
             value: "Test value",
             id: "TestID",
             displayString: "Test Display",

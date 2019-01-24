@@ -46,11 +46,6 @@ export interface SelectHandledProps extends SelectManagedClasses {
     defaultSelection?: SelectOptionData[];
 
     /**
-     * Specifies that the drop-down list should automatically get focus when the page loads
-     */
-    autofocus?: boolean;
-
-    /**
      * Specifies that the drop-down list is open
      */
     isMenuOpen?: boolean;
@@ -88,7 +83,7 @@ export interface SelectHandledProps extends SelectManagedClasses {
     /**
      * The onValueChange event handler (note: using "onChange" at the event name caused type conflict issues)
      */
-    onValueChange?: (event?: React.ChangeEvent<HTMLSelectElement>) => void;
+    onValueChange?: (newValue: string, selectedOptions: SelectOptionData[]) => void;
 }
 
 export type SelectProps = SelectHandledProps & SelectUnhandledProps;

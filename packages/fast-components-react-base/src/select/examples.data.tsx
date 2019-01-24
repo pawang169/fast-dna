@@ -30,6 +30,7 @@ const examples: ComponentFactoryExample<SelectProps> = {
     documentation: <Documentation />,
     detailData: {
         ...managedClasses,
+        placeholder: "placeholder",
         children: [
             {
                 id: "select-option",
@@ -54,6 +55,7 @@ const examples: ComponentFactoryExample<SelectProps> = {
     data: [
         {
             ...managedClasses,
+            placeholder: "placeholder",
             children: [
                 {
                     id: "select-option",

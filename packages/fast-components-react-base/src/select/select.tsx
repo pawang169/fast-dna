@@ -21,7 +21,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         disabled: false,
         selectedOptions: [],
         defaultSelection: [],
-        placeholder: "----",
+        placeholder: "",
     };
 
     /**
@@ -29,11 +29,9 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      */
     protected handledProps: HandledProps<SelectHandledProps> = {
         isMenuOpen: void 0,
-        autofocus: void 0,
         disabled: void 0,
         form: void 0,
         multiple: void 0,
-        name: void 0,
         contentDisplayRenderFunction: void 0,
         menuRenderFunction: void 0,
         dataValueFormatterFunction: void 0,
@@ -70,7 +68,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
             <div
                 {...this.unhandledProps()}
                 ref={this.rootElement}
-                aria-disabled={this.props.disabled || undefined}
+                aria-disabled={this.props.disabled || false}
                 className={this.generateClassNames()}
                 onKeyDown={this.handleKeydown}
                 onClick={this.selectClicked}
@@ -115,8 +113,9 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         return (
             <select
                 name={this.props.name}
+                form={this.props.form}
                 value={this.state.value}
-                onChange={this.handleValueChange}
+                multiple={this.props.multiple}
                 style={{
                     display: "none",
                 }}
@@ -124,14 +123,14 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         );
     }
 
-    /**
-     * Called when value changes on hidden select element
-     */
-    private handleValueChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-        if (this.props.onValueChange) {
-            this.props.onValueChange(e);
-        }
-    };
+    // /**
+    //  * Called when value changes on hidden select element
+    //  */
+    // private handleValueChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    //     if (this.props.onValueChange) {
+    //         this.props.onValueChange(e);
+    //     }
+    // };
 
     /**
      * Deternmines which function to use to render content display (ie. the part of the control that shows when the menu isn't open)
@@ -285,10 +284,8 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
                 this.state.selectedOptions,
                 [option]
             );
-            this.setState({
-                selectedOptions: newSelectedOptions,
-                value: this.getFormattedValueString(newSelectedOptions),
-            });
+
+            this.updateValue(newSelectedOptions);
         } else {
             this.closeMenu();
 
@@ -296,10 +293,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
                 return;
             }
 
-            this.setState({
-                selectedOptions: [option],
-                value: this.getFormattedValueString([option]),
-            });
+            this.updateValue([option]);
         }
     };
 
@@ -313,11 +307,18 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         if (this.props.multiple || this.state.selectedOptions === [option]) {
             return;
         }
+        this.updateValue([option]);
+    };
 
+    private updateValue = (newSelection: SelectOptionData[]): void => {
+        const newValue: string = this.getFormattedValueString(newSelection);
         this.setState({
-            selectedOptions: [option],
-            value: this.getFormattedValueString([option]),
+            selectedOptions: newSelection,
+            value: newValue,
         });
+        if (this.props.onValueChange) {
+            this.props.onValueChange(newValue, newSelection);
+        }
     };
 
     /**

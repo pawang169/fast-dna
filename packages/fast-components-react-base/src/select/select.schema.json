@@ -5,6 +5,14 @@
     "type": "object",
     "id": "select",
     "properties": {
+        "placeholder": {
+            "title": "Placeholder",
+            "type": "string"
+        },
+        "form": {
+            "title": "Form",
+            "type": "string"
+        },
         "disabled": {
             "title": "Disabled",
             "type": "boolean"
