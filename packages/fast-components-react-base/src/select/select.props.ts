@@ -76,6 +76,11 @@ export interface SelectHandledProps extends SelectManagedClasses {
     name?: string;
 
     /**
+     * String displayed when there is no selected value
+     */
+    placeholder?: string;
+
+    /**
      * Specifies that the user is required to select a value before submitting the form
      */
     required?: boolean;

@@ -21,6 +21,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         disabled: false,
         selectedOptions: [],
         defaultSelection: [],
+        placeholder: "----",
     };
 
     /**
@@ -41,6 +42,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         selectedOptions: void 0,
         defaultSelection: void 0,
         onValueChange: void 0,
+        placeholder: void 0,
     };
 
     private rootElement: React.RefObject<HTMLDivElement> = React.createRef<
@@ -76,6 +78,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
                 <SelectContext.Provider
                     value={{
                         selectedOptions: this.state.selectedOptions,
+                        optionFocused: this.selectOptionfocused,
                         optionInvoked: this.selectOptionInvoked,
                         isMenuOpen: this.state.isMenuOpen,
                     }}
@@ -92,7 +95,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      * Create class names
      */
     protected generateClassNames(): string {
-        let className: string = get(this.props.managedClasses, "select") || "";
+        let className: string = get(this.props.managedClasses, "select", "");
 
         if (this.props.disabled) {
             className = className.concat(
@@ -175,7 +178,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         formattedValue: string
     ): React.ReactNode => {
         if (selectedOptions.length === 0) {
-            return "-----------";
+            return this.props.placeholder;
         } else {
             const displayStrings: string[] = selectedOptions.map(
                 (option: SelectOptionData) => {
@@ -244,17 +247,19 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
      * Handles key events
      */
     private handleKeydown = (e: React.KeyboardEvent<HTMLDivElement>): void => {
+        if (e.defaultPrevented) {
+            return;
+        }
+
         switch (e.keyCode) {
             case KeyCodes.enter:
             case KeyCodes.space:
                 e.preventDefault();
                 this.openMenu();
-
                 break;
             case KeyCodes.escape:
                 e.preventDefault();
                 this.closeMenu();
-
                 break;
         }
     };
@@ -285,16 +290,34 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
                 value: this.getFormattedValueString(newSelectedOptions),
             });
         } else {
+            this.closeMenu();
+
             if (this.state.selectedOptions === [option]) {
                 return;
             }
 
-            this.closeMenu();
             this.setState({
                 selectedOptions: [option],
                 value: this.getFormattedValueString([option]),
             });
         }
+    };
+
+    /**
+     * Function called by child select options when they have been focused
+     */
+    private selectOptionfocused = (
+        option: SelectOptionData,
+        event: React.FocusEvent<HTMLDivElement>
+    ): void => {
+        if (this.props.multiple || this.state.selectedOptions === [option]) {
+            return;
+        }
+
+        this.setState({
+            selectedOptions: [option],
+            value: this.getFormattedValueString([option]),
+        });
     };
 
     /**
@@ -321,6 +344,9 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         }
     };
 
+    /**
+     * tried to close the menu when when there are clicks outside
+     */
     private handleWindowClick = (event: MouseEvent): void => {
         if (!this.rootElement.current.contains(event.target as Element)) {
             this.closeMenu();

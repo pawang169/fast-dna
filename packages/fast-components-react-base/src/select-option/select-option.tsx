@@ -54,6 +54,7 @@ class SelectOption extends Foundation<
                 aria-disabled={this.props.disabled}
                 onClick={this.handleClick}
                 onKeyDown={this.handleKeyDown}
+                onFocus={this.handleGotFocus}
             >
                 {this.props.displayString}
                 {this.props.children}
@@ -77,8 +78,9 @@ class SelectOption extends Foundation<
             displayString: this.props.displayString,
         };
 
-        //  TODO: confirm this is a valid function
-        (this.context as SelectContextType).optionInvoked(optionData, event);
+        if (typeof (this.context as SelectContextType).optionInvoked === "function") {
+            (this.context as SelectContextType).optionInvoked(optionData, event);
+        }
     }
 
     /**
@@ -125,9 +127,28 @@ class SelectOption extends Foundation<
      * Handle keyDown
      */
     private handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>): void => {
-        if (event.keyCode === KeyCodes.enter) {
+        if (event.keyCode === KeyCodes.enter || event.keyCode === KeyCodes.space) {
             event.preventDefault();
             this.invokeOption(event);
+        }
+    };
+
+    /**
+     * Handle focus event
+     */
+    private handleGotFocus = (event: React.FocusEvent<HTMLDivElement>): void => {
+        if (this.props.disabled) {
+            return;
+        }
+
+        const optionData: SelectOptionData = {
+            id: this.props.id,
+            value: this.props.value,
+            displayString: this.props.displayString,
+        };
+
+        if (typeof (this.context as SelectContextType).optionFocused === "function") {
+            (this.context as SelectContextType).optionFocused(optionData, event);
         }
     };
 }
