@@ -53,6 +53,7 @@ class SelectOption extends Foundation<
                 aria-selected={isSelected}
                 aria-disabled={this.props.disabled}
                 onClick={this.handleClick}
+                id={this.props.id}
                 onKeyDown={this.handleKeyDown}
                 onFocus={this.handleGotFocus}
             >

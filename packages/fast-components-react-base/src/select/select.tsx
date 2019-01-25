@@ -279,10 +279,8 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
                 return;
             }
 
-            const newSelectedOptions: SelectOptionData[] = Object.assign(
-                {},
-                this.state.selectedOptions,
-                [option]
+            const newSelectedOptions: SelectOptionData[] = [option].concat(
+                this.state.selectedOptions
             );
 
             this.updateValue(newSelectedOptions);
