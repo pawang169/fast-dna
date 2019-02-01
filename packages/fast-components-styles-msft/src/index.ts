@@ -96,6 +96,12 @@ import ParagraphStyles from "./paragraph";
 export { ParagraphStyles };
 
 /**
+ * Export paragraph styles
+ */
+import PivotStyles from "./pivot";
+export { PivotStyles };
+
+/**
  * Export progress styles
  */
 import ProgressStyles from "./progress";

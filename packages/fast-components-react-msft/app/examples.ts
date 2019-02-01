@@ -61,6 +61,9 @@ export { MetatextExamples };
 import ParagraphExamples from "../src/paragraph/examples.data";
 export { ParagraphExamples };
 
+import PivotExamples from "../src/pivot/examples.data";
+export { PivotExamples };
+
 import ProgressExamples from "../src/progress/examples.data";
 export { ProgressExamples };
 
