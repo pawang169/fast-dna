@@ -33,6 +33,7 @@ class Listbox extends Foundation<
         multiselectable: false,
         defaultSelection: [],
         typeAheadPropertyKey: "displayString",
+        autoFocus: false,
     };
 
     /**
@@ -48,6 +49,60 @@ class Listbox extends Foundation<
             children
         );
         return selectedItems;
+    }
+
+    /**
+     * returns the the first selectable item in the provided array of children
+     */
+    public static getFirstValidOptionInRange = (
+        startIndex: number,
+        endIndex: number,
+        childrenAsArray: React.ReactNode[],
+        increment: number
+    ): React.ReactNode => {
+        for (let i: number = startIndex; i !== endIndex; i = 1 + increment) {
+            const thisOption: React.ReactNode = childrenAsArray[i] as React.ReactNode;
+            if (Listbox.isValidSelectedItem(thisOption as React.ReactElement<any>)) {
+                return thisOption;
+            }
+            return null;
+        }
+    };
+
+    /**
+     * Gets the index of an item from it's id by examining children props
+     */
+    public static getItemIndexById(itemId: string, children: React.ReactNode): number {
+        const childrenAsArray: React.ReactNode[] = React.Children.toArray(children);
+        return childrenAsArray.findIndex(
+            (child: React.ReactElement<any>): boolean => {
+                if (
+                    child.props[Listbox.idPropertyKey] === undefined ||
+                    child.props[Listbox.idPropertyKey] !== itemId
+                ) {
+                    return false;
+                }
+                return true;
+            }
+        );
+    }
+
+    /**
+     * tests whether a React.ReactElement is a valid item to select
+     * (ie. such an option id exists and the option is not disabled),
+     * the values of the returned data objects are updated to reflect values of child object
+     * with matching id.
+     */
+    public static isValidSelectedItem(itemNode: React.ReactElement<any>): boolean {
+        if (
+            itemNode === undefined ||
+            itemNode.props[Listbox.disabledPropertyKey] === true ||
+            itemNode.props[Listbox.valuePropertyKey] === undefined
+        ) {
+            return false;
+        }
+
+        return true;
     }
 
     private static valuePropertyKey: string = "value";
@@ -118,11 +173,7 @@ class Listbox extends Foundation<
                     itemId,
                     children
                 ) as React.ReactElement<any>;
-                if (
-                    itemNode === undefined ||
-                    itemNode.props[Listbox.disabledPropertyKey] === true ||
-                    itemNode.props[Listbox.valuePropertyKey] === undefined
-                ) {
+                if (!Listbox.isValidSelectedItem(itemNode)) {
                     return null;
                 }
 
@@ -144,6 +195,7 @@ class Listbox extends Foundation<
         onSelectedItemsChanged: void 0,
         selectedItems: void 0,
         typeAheadPropertyKey: void 0,
+        autoFocus: void 0,
     };
 
     private rootElement: React.RefObject<HTMLDivElement> = React.createRef<
@@ -211,10 +263,21 @@ class Listbox extends Foundation<
     }
 
     public componentDidMount(): void {
-        const children: Element[] = this.domChildren();
-        const focusIndex: number = children.findIndex(this.isFocusableElement);
+        let focusIndex: number = -1;
 
+        if (this.state.selectedItems.length > 0) {
+            focusIndex = Listbox.getItemIndexById(
+                this.state.selectedItems[0].id,
+                this.props.children
+            );
+        } else {
+            const children: Element[] = this.domChildren();
+            focusIndex = children.findIndex(this.isFocusableElement);
+        }
         if (focusIndex !== -1) {
+            if (this.props.autoFocus) {
+                this.setFocus(focusIndex, +1);
+            }
             this.setState({
                 focusIndex,
             });
@@ -342,13 +405,18 @@ class Listbox extends Foundation<
         }
 
         let focusItemId: string;
-        event.preventDefault();
 
         switch (event.keyCode) {
+            case KeyCodes.escape:
+            case KeyCodes.enter:
+            case KeyCodes.space:
+            case KeyCodes.tab:
+                return;
+
             case KeyCodes.arrowDown:
             case KeyCodes.arrowRight:
                 focusItemId = this.setFocus(this.state.focusIndex + 1, 1);
-
+                event.preventDefault();
                 if (this.props.multiselectable && event.shiftKey && focusItemId !== "") {
                     const itemProps: ListboxItemProps = Listbox.getItemPropsById(
                         focusItemId,
@@ -364,6 +432,7 @@ class Listbox extends Foundation<
             case KeyCodes.arrowUp:
             case KeyCodes.arrowLeft:
                 focusItemId = this.setFocus(this.state.focusIndex - 1, -1);
+                event.preventDefault();
                 if (this.props.multiselectable && event.shiftKey && focusItemId !== "") {
                     const itemData: ListboxItemProps = Listbox.getItemPropsById(
                         focusItemId,
@@ -513,9 +582,9 @@ class Listbox extends Foundation<
         if (culledSelection.length < this.state.selectedItems.length) {
             this.updateSelection(culledSelection);
         } else {
-            const newSelectedItems: ListboxItemProps[] = [item].concat(
-                this.state.selectedItems
-            );
+            const newSelectedItems: ListboxItemProps[] = this.state.selectedItems.concat([
+                item,
+            ]);
             this.updateSelection(newSelectedItems);
         }
     };
@@ -532,13 +601,7 @@ class Listbox extends Foundation<
 
         const newSelectedItems: ListboxItemProps[] = childrenInRange.map(
             (child: React.ReactElement<any>) => {
-                const thisItemData: ListboxItemProps = {
-                    id: child.props.id,
-                    value: child.props[Listbox.valuePropertyKey],
-                    displayString: child.props[Listbox.displayStringPropertyKey],
-                };
-
-                return thisItemData;
+                return child.props as ListboxItemProps;
             }
         );
 
