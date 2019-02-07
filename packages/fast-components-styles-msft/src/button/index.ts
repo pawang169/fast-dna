@@ -61,8 +61,9 @@ function applyTransparentBackplateStyles(
             boxShadow: "none",
             ...applyTransparentBackground(),
         },
+        // Underline
         "&:active $button_contentRegion::before, &:hover $button_contentRegion::before": {
-            background: ensureBrandNormal(designSystem),
+            background: accentFillRest,
         },
         [`&${focusVisible()} $button_contentRegion::before`]: {
             background: ensureForegroundNormal,
@@ -71,7 +72,7 @@ function applyTransparentBackplateStyles(
             ...applyTransparentBackground(),
         },
         "& $button_beforeContent, & $button_afterContent": {
-            fill: ensureBrandNormal(designSystem),
+            fill: accentFillRest,
         },
     };
 }
