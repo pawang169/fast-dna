@@ -1,9 +1,13 @@
-import {
-    ComponentStyles,
-    ComponentStyleSheet,
-    CSSRules,
-} from "@microsoft/fast-jss-manager";
 import { applyTypeRampConfig } from "../utilities/typography";
+import {
+    disabledContrast,
+    ensureBrandNormal,
+    ensureForegroundNormal,
+    ensureLargeContrast,
+    ensureNormalContrast,
+    hoverContrast,
+    scaleContrastNormal,
+} from "../utilities/colors";
 import { ButtonClassNameContract } from "@microsoft/fast-components-class-name-contracts-msft";
 import {
     applyFocusVisible,
@@ -17,25 +21,40 @@ import {
 import { curry } from "lodash-es";
 import { DesignSystem, withDesignSystemDefaults } from "../design-system";
 import {
-    disabledContrast,
-    ensureBrandNormal,
-    ensureForegroundNormal,
-    ensureLargeContrast,
-    ensureNormalContrast,
-    hoverContrast,
-    scaleContrastNormal,
-} from "../utilities/colors";
+    ComponentStyles,
+    ComponentStyleSheet,
+    CSSRules,
+} from "@microsoft/fast-jss-manager";
 import Chroma from "chroma-js";
 import { density } from "../utilities/density";
 import { defaultHeight, maxHeight, minHeight } from "../utilities/height";
 import outlinePattern from "../patterns/outline";
+import {
+    accentFillActive,
+    accentFillHover,
+    accentFillRest,
+    accentForegroundActive,
+    accentForegroundCut,
+    accentForegroundHover,
+    accentForegroundRest,
+    neutralFillActive,
+    neutralFillHover,
+    neutralFillRest,
+    neutralFillStealthActive,
+    neutralFillStealthHover,
+    neutralFillStealthRest,
+    neutralForeground,
+    neutralOutlineActive,
+    neutralOutlineHover,
+    neutralOutlineRest,
+} from "../utilities/color";
 
 function applyTransparentBackplateStyles(
     designSystem: DesignSystem
 ): CSSRules<DesignSystem> {
     return {
-        color: ensureBrandNormal(designSystem),
-        fill: ensureBrandNormal(designSystem),
+        color: accentForegroundRest(designSystem),
+        fill: accentForegroundRest(designSystem),
         ...applyTransparentBackground(),
         [`&:hover, &${focusVisible()}`]: {
             borderColor: "transparent",
@@ -50,14 +69,6 @@ function applyTransparentBackplateStyles(
         },
         "&$button__disabled, &$button__disabled $button_contentRegion::before": {
             ...applyTransparentBackground(),
-        },
-        "&$button__disabled": {
-            borderColor: "transparent",
-            color: disabledForegroundContrast(designSystem),
-            fill: disabledForegroundContrast(designSystem),
-            "& $button_beforeContent, & $button_afterContent": {
-                fill: disabledForegroundContrast(designSystem),
-            },
         },
         "& $button_beforeContent, & $button_afterContent": {
             fill: ensureBrandNormal(designSystem),
@@ -200,71 +211,63 @@ const styles: ComponentStyles<ButtonClassNameContract, DesignSystem> = (
             overflow: "hidden",
             textDecoration: "none",
             whiteSpace: "nowrap",
-            transition: "all 0.2s ease-in-out",
-            color: secondaryForegroundColor,
-            fill: secondaryForegroundColor,
-            backgroundColor: secondaryBackgroundColor,
+            transition: "all 0.1s ease-in-out",
+            color: neutralForeground,
+            fill: neutralForeground,
+            background: neutralFillRest,
             "&:hover": {
-                backgroundColor: secondaryHoverBackgroundColor,
+                background: neutralFillHover,
+            },
+            "&:active": {
+                background: neutralFillActive,
             },
             ...applyFocusVisible({
                 borderColor: secondaryFocusBorderColor,
-                boxShadow: secondaryFocusBoxShadow,
+                boxShadow: secondaryFocusBoxShadow, // TODO Need to create focus utilities
             }),
             "&$button__disabled": {
                 cursor: "not-allowed",
-                backgroundColor: secondaryDisabledBackgroundColor,
-                color: secondaryDisabledColor,
-                fill: secondaryDisabledColor,
-                "& $button_beforeContent, & $button_afterContent": {
-                    fill: secondaryDisabledColor,
-                },
+                background: neutralFillRest,
+                opacity: "0.3",
             },
             "&::-moz-focus-inner": {
                 border: "0",
             },
         },
         button__primary: {
-            color,
-            fill: color,
-            backgroundColor: primaryRestBackgroundColor,
+            color: accentForegroundCut,
+            fill: accentForegroundCut,
+            background: accentFillRest,
             "&:hover": {
-                backgroundColor: primaryHoverBackground,
+                background: accentFillHover,
+            },
+            "&:active": {
+                background: accentFillActive,
             },
             ...applyFocusVisible({
                 borderColor: primaryFocusBorderColor,
-                boxShadow: primaryFocusBoxShadow,
+                boxShadow: primaryFocusBoxShadow, // TODO Need to create focus utilities
             }),
             "&$button__disabled": {
-                color: primaryDisabledColor,
-                fill: primaryDisabledColor,
-                backgroundColor: primaryDisabledBackground,
-                "& $button_beforeContent, & $button_afterContent": {
-                    fill: primaryDisabledColor,
-                },
+                background: accentFillRest,
             },
             "& $button_beforeContent, & $button_afterContent": {
-                fill: color,
+                fill: accentForegroundCut,
             },
         },
         button__outline: {
-            ...outlinePattern.rest,
-            "&, &:hover": {
-                color: outlineColor,
-                ...applyTransparentBackground(),
-            },
+            background: neutralFillStealthRest,
+            border: `1px solid ${neutralOutlineRest(designSystem)}`,
             "&:hover": {
-                ...outlinePattern.hover,
+                background: neutralFillStealthHover,
+                border: `1px solid ${neutralOutlineHover(designSystem)}`,
             },
             ...applyFocusVisible({
-                ...applyTransparentBackground(),
                 ...outlinePattern.focus,
             }),
             "&$button__disabled": {
-                ...applyTransparentBackground(),
-                ...outlinePattern.disabled,
-                color: outlineDisabledColor,
-                fill: outlineDisabledColor,
+                background: neutralFillStealthRest,
+                border: `1px solid ${neutralOutlineRest(designSystem)}`,
             },
         },
         button__lightweight: {
