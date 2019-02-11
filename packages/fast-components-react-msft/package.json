@@ -41,8 +41,8 @@
     "coverageThreshold": {
       "global": {
         "statements": 95,
-        "branches": 90,
-        "functions": 95,
+        "branches": 89,
+        "functions": 94.5,
         "lines": 95
       }
     },
@@ -81,6 +81,7 @@
     "@microsoft/fast-jss-manager": "^3.0.9",
     "@microsoft/fast-sketch-library": "^3.0.3",
     "@microsoft/fast-tslint-rules": "^3.0.1",
+    "@microsoft/fast-web-utilities": "^3.1.0",
     "@types/jest": "^23.3.5",
     "@types/lodash-es": "^4.17.0",
     "@types/node": "^9.4.6",
