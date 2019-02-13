@@ -189,6 +189,7 @@ class Listbox extends Foundation<
     protected handledProps: HandledProps<ListboxHandledProps> = {
         children: void 0,
         defaultSelection: void 0,
+        disabled: void 0,
         labelledBy: void 0,
         managedClasses: void 0,
         multiselectable: void 0,
@@ -242,6 +243,7 @@ class Listbox extends Foundation<
                 {...this.unhandledProps()}
                 ref={this.rootElement}
                 role="listbox"
+                aria-disabled={this.props.disabled || null}
                 aria-multiselectable={this.props.multiselectable || null}
                 aria-activedescendant={this.state.focussedItemId}
                 aria-labelledby={this.props.labelledBy || null}
@@ -321,7 +323,8 @@ class Listbox extends Foundation<
         return (
             element instanceof HTMLElement &&
             element.getAttribute("role") === "option" &&
-            !this.isDisabledElement(element)
+            !this.isDisabledElement(element) &&
+            !this.props.disabled
         );
     };
 
@@ -361,7 +364,9 @@ class Listbox extends Foundation<
             const child: Element = children[focusIndex];
             focusItemId = child.id;
             if (this.isFocusableElement(child)) {
-                child.focus();
+                if (!this.props.disabled) {
+                    child.focus();
+                }
                 break;
             }
 
@@ -378,6 +383,10 @@ class Listbox extends Foundation<
         item: ListboxItemProps,
         event: React.FocusEvent<HTMLDivElement>
     ): void => {
+        if (this.props.disabled) {
+            return;
+        }
+
         const target: Element = event.currentTarget;
         const focusIndex: number = this.domChildren().indexOf(target);
 
@@ -400,7 +409,7 @@ class Listbox extends Foundation<
      * Handle the keydown event of the root menu
      */
     private handleMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>): void => {
-        if (event.defaultPrevented) {
+        if (event.defaultPrevented || this.props.disabled) {
             return;
         }
 
@@ -473,26 +482,6 @@ class Listbox extends Foundation<
     };
 
     /**
-     * Gets a child node from it's id by examining provided children
-     */
-    private getNodeById = (
-        itemId: string,
-        children: React.ReactNode
-    ): React.ReactNode => {
-        return React.Children.toArray(children).find(
-            (child: React.ReactElement<any>): boolean => {
-                if (
-                    child.props[Listbox.idPropertyKey] === undefined ||
-                    child.props[Listbox.idPropertyKey] !== itemId
-                ) {
-                    return false;
-                }
-                return true;
-            }
-        );
-    };
-
-    /**
      * Sets focus based on characters typed
      */
     private processTypeAhead = (e: React.KeyboardEvent<HTMLDivElement>): void => {
@@ -546,6 +535,9 @@ class Listbox extends Foundation<
         item: ListboxItemProps,
         event: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>
     ): void => {
+        if (this.props.disabled) {
+            return;
+        }
         const target: Element = event.currentTarget;
         const itemIndex: number = this.domChildren().indexOf(target);
         if (this.props.multiselectable && event.type === "click") {
