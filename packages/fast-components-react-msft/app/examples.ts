@@ -55,6 +55,9 @@ export { ImageExamples };
 import LabelExamples from "../src/label/examples.data";
 export { LabelExamples };
 
+import ListboxItemExamples from "../src/listbox-item/examples.data";
+export { ListboxItemExamples };
+
 import MetatextExamples from "../src/metatext/examples.data";
 export { MetatextExamples };
 
