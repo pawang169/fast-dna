@@ -21,6 +21,7 @@ function listboxItemPropFactory(id: string): ListboxItemProps {
 const managedClasses: SelectManagedClasses = {
     managedClasses: {
         select: "select",
+        select__disabled: "select__disabled",
     },
 };
 

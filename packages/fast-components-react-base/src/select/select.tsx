@@ -116,6 +116,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         return (
             <div
                 {...this.unhandledProps()}
+                aria-disabled={this.props.disabled || null}
                 ref={this.rootElement}
                 className={this.generateClassNames()}
                 onKeyDown={this.handleKeydown}
@@ -137,7 +138,7 @@ class Select extends Foundation<SelectHandledProps, SelectUnhandledProps, Select
         if (this.props.disabled) {
             className = className.concat(
                 " ",
-                get(this.props.managedClasses, "select__disabled")
+                get(this.props.managedClasses, "select__disabled", "")
             );
         }
 

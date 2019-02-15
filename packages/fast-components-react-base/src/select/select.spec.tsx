@@ -295,4 +295,41 @@ describe("select", (): void => {
             .simulate("keydown", { keyCode: KeyCodes.arrowDown, shiftKey: true });
         expect(rendered.find("select").prop("value")).toBe("testName=a&testName=b");
     });
+
+    test("IsMenuOpen prop set to false overrides default behavior in single select mode", (): void => {
+        const rendered: any = mount(
+            <Select isMenuOpen={false}>
+                {itemA}
+                {itemB}
+                {itemC}
+            </Select>
+        );
+
+        rendered.simulate("click");
+        expect(rendered.state("isMenuOpen")).toBe(false);
+    });
+
+    test("IsMenuOpen prop set to true overrides default behavior in single select mode", (): void => {
+        const rendered: any = mount(
+            <Select isMenuOpen={true}>
+                {itemA}
+                {itemB}
+                {itemC}
+            </Select>
+        );
+
+        expect(rendered.state("isMenuOpen")).toBe(true);
+    });
+
+    test("IsMenuOpen prop set to false overrides default behavior in multiple select mode", (): void => {
+        const rendered: any = mount(
+            <Select isMenuOpen={false} multiselectable={true}>
+                {itemA}
+                {itemB}
+                {itemC}
+            </Select>
+        );
+
+        expect(rendered.state("isMenuOpen")).toBe(false);
+    });
 });

@@ -6,4 +6,9 @@ export interface SelectClassNameContract {
      * The root of the select component
      */
     select?: string;
+
+    /**
+     * The disabled modifier
+     */
+    select__disabled?: string;
 }
